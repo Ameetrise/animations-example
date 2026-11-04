@@ -12,4 +12,6 @@ export const implementationNotes = `1. This demo is to show my skill with animat
 
 7. Used Three.js with React Three Fiber for the 3D mystery box, used existing box models to speed up the process.
 
-8. Small detailings are achieved with AI.`;
+8. Small detailings are achieved with AI.
+
+9. I took design inspiration and references from TEMU mobile app`;
