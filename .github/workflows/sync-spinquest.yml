@@ -1,0 +1,41 @@
+name: Sync SpinQuest
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-spinquest
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.repository == 'Ameetrise/animations-example'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Publish shared code to SpinQuest
+        env:
+          SPINQUEST_DEPLOY_KEY: ${{ secrets.SPINQUEST_DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$SPINQUEST_DEPLOY_KEY"
+          mkdir -p "$RUNNER_TEMP/spinquest-ssh"
+          chmod 700 "$RUNNER_TEMP/spinquest-ssh"
+          printf '%s\n' "$SPINQUEST_DEPLOY_KEY" > "$RUNNER_TEMP/spinquest-ssh/key"
+          chmod 600 "$RUNNER_TEMP/spinquest-ssh/key"
+          curl --fail --silent --show-error https://api.github.com/meta |
+            jq -r '.ssh_keys[] | "github.com " + .' > "$RUNNER_TEMP/spinquest-ssh/known_hosts"
+          export GIT_SSH_COMMAND="ssh -i $RUNNER_TEMP/spinquest-ssh/key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$RUNNER_TEMP/spinquest-ssh/known_hosts"
+          git push git@github.com:Ameetrise/spinquest.git HEAD:refs/heads/master
+      - name: Remove temporary key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/spinquest-ssh"

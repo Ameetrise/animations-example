@@ -10,7 +10,10 @@ if (!repository) {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
     }).trim();
-    repository = remote.split("/").at(-1).replace(/\.git$/, "");
+    repository = remote
+      .split("/")
+      .at(-1)
+      .replace(/\.git$/, "");
   } catch {
     repository = "animations-example";
   }
@@ -24,7 +27,9 @@ if (!["pack", "spinquest"].includes(brand)) {
   throw new Error("EXPO_PUBLIC_BRAND must be pack or spinquest.");
 }
 
-console.log(`Starting Expo with ${brand === "spinquest" ? "SpinQuest" : "Pack.com"} branding`);
+console.log(
+  `Starting Expo with ${brand === "spinquest" ? "SpinQuest" : "Pack.com"} branding`,
+);
 const result = spawnSync(
   process.execPath,
   [require.resolve("expo/bin/cli"), ...process.argv.slice(2)],
