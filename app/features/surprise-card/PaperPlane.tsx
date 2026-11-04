@@ -18,7 +18,31 @@ export function PaperPlane({ flight, flightX, flightY, size }: Props) {
     opacity: interpolate(flight.value, [0.22, 0.34], [0, 1], "clamp"),
     transform: [
       {
-        rotate: `${(Math.atan2(flightY.value, flightX.value) * 180) / Math.PI}deg`,
+        rotate: `${(Math.atan2(flightY.value, flightX.value) * 180) / Math.PI + interpolate(flight.value, [0.22, 0.45, 0.7, 1], [-16, -8, 5, 0], "clamp")}deg`,
+      },
+      {
+        perspective: 700,
+      },
+      {
+        rotateX: `${interpolate(flight.value, [0.22, 0.45, 0.7, 1], [0, -18, 18, 0], "clamp")}deg`,
+      },
+    ],
+  }));
+  const trailStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      flight.value,
+      [0.42, 0.55, 0.82, 1],
+      [0, 0.55, 0.3, 0],
+      "clamp",
+    ),
+    transform: [
+      {
+        scaleX: interpolate(
+          flight.value,
+          [0.42, 0.7, 1],
+          [0.3, 1.2, 0.5],
+          "clamp",
+        ),
       },
     ],
   }));
@@ -49,11 +73,25 @@ export function PaperPlane({ flight, flightX, flightY, size }: Props) {
         style={[
           {
             width: size,
-            height: size * 0.68,
+            height: size * 0.62,
           },
           planeStyle,
         ]}
       >
+        <Animated.View
+          style={[
+            styles.trails,
+            {
+              top: size * 0.25,
+              left: -size * 0.65,
+              width: size * 0.55,
+            },
+            trailStyle,
+          ]}
+        >
+          <View style={styles.trailLong} />
+          <View style={styles.trailShort} />
+        </Animated.View>
         <Animated.View
           style={[
             styles.wing,
@@ -71,8 +109,9 @@ export function PaperPlane({ flight, flightX, flightY, size }: Props) {
             styles.wing,
             {
               top: size * 0.34,
-              borderLeftWidth: size,
-              borderBottomWidth: size * 0.34,
+              left: size * 0.16,
+              borderLeftWidth: size * 0.84,
+              borderBottomWidth: size * 0.26,
               borderLeftColor: palette.planeGold,
             },
             lowerStyle,
@@ -80,10 +119,35 @@ export function PaperPlane({ flight, flightX, flightY, size }: Props) {
         />
         <View
           style={[
+            styles.wing,
+            {
+              top: size * 0.34,
+              left: size * 0.16,
+              borderLeftWidth: size * 0.84,
+              borderBottomWidth: size * 0.095,
+              borderLeftColor: palette.paperPlaneCreaseBackgroundColor,
+            },
+          ]}
+        />
+        <View
+          style={[
+            styles.wing,
+            {
+              top: size * 0.245,
+              left: size * 0.16,
+              borderLeftWidth: size * 0.84,
+              borderTopWidth: size * 0.095,
+              borderLeftColor: palette.white,
+            },
+          ]}
+        />
+        <View
+          style={[
             styles.crease,
             {
               top: size * 0.34,
-              width: size,
+              left: size * 0.16,
+              width: size * 0.84,
             },
           ]}
         />
@@ -101,6 +165,23 @@ const styles = StyleSheet.create({
     left: 0,
     alignItems: "center",
     justifyContent: "center",
+  },
+  trails: {
+    position: "absolute",
+    gap: 8,
+    alignItems: "flex-end",
+  },
+  trailLong: {
+    width: "100%",
+    height: 2,
+    borderRadius: 2,
+    backgroundColor: palette.planeGold,
+  },
+  trailShort: {
+    width: "65%",
+    height: 1,
+    borderRadius: 1,
+    backgroundColor: palette.planeGold,
   },
   wing: {
     position: "absolute",

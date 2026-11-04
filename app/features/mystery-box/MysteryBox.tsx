@@ -14,6 +14,7 @@ import Animated, {
 } from "react-native-reanimated";
 import type { DemoProps } from "../types";
 import { BoxPrize } from "./BoxPrize";
+import { RevealSpark } from "./RevealSpark";
 import { ShootingStar } from "./ShootingStar";
 import {
   Pressable,
@@ -108,6 +109,32 @@ export function MysteryBox({
       },
     ],
   }));
+  const lightStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      progress.value,
+      [0.18, 0.3, 0.45, 0.7, 1],
+      [0, 0.3, 0.8, 0.45, 0],
+      "clamp",
+    ),
+    transform: [
+      {
+        scaleY: interpolate(
+          progress.value,
+          [0.18, 0.6, 1],
+          [0.1, 1, 1.1],
+          "clamp",
+        ),
+      },
+      {
+        scaleX: interpolate(
+          progress.value,
+          [0.18, 0.6, 1],
+          [0.6, 1, 1.15],
+          "clamp",
+        ),
+      },
+    ],
+  }));
   const burstStyle = useAnimatedStyle(() => ({
     opacity: interpolate(progress.value, [0.78, 0.86, 1], [0, 0.8, 0], "clamp"),
     transform: [
@@ -145,6 +172,10 @@ export function MysteryBox({
         <Animated.View
           pointerEvents="none"
           style={[styles.prizeBurst, burstStyle]}
+        />
+        <Animated.View
+          pointerEvents="none"
+          style={[styles.lightBeam, lightStyle]}
         />
         <View style={styles.shadow} />
         <View style={styles.contactShadow} />
@@ -195,6 +226,15 @@ export function MysteryBox({
           <View style={[styles.bowLoop, styles.bowRight]} />
           <View style={styles.knot} />
         </Animated.View>
+        {!reduceMotion &&
+          Array.from(
+            {
+              length: 14,
+            },
+            (_, index) => (
+              <RevealSpark key={index} index={index} progress={progress} />
+            ),
+          )}
         <View style={styles.tagString} />
         <View style={styles.tag}>
           <View style={styles.tagHole} />
@@ -210,6 +250,19 @@ const styles = StyleSheet.create({
     width: 280,
     height: 420,
     justifyContent: "flex-end",
+  },
+  lightBeam: {
+    position: "absolute",
+    top: -120,
+    left: 55,
+    width: 170,
+    height: 200,
+    borderTopLeftRadius: 80,
+    borderTopRightRadius: 80,
+    backgroundColor: palette.mysteryBoxGlowBackgroundColor,
+    borderBottomWidth: 3,
+    borderBottomColor: palette.sparkleGold,
+    boxShadow: palette.mysteryBoxGlowBoxShadow,
   },
   prizeBurst: {
     position: "absolute",

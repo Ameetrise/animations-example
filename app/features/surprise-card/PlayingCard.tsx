@@ -24,6 +24,7 @@ type Props = {
   index: number;
   width: number;
   selected: boolean;
+  hasSelection: boolean;
   shuffle: SharedValue<number>;
   disabled: boolean;
   product: {
@@ -43,6 +44,7 @@ export function PlayingCard({
   onClaimMoney,
   width,
   selected,
+  hasSelection,
   shuffle,
   disabled,
   product,
@@ -52,7 +54,18 @@ export function PlayingCard({
 }: Props) {
   const cardRef = useRef<ComponentRef<typeof View>>(null);
   const sent = useRef(false);
+  const emphasis = useSharedValue(1);
   const selection = useSharedValue(selected ? 1 : 0);
+
+  useEffect(() => {
+    emphasis.set(
+      withSpring(selected ? 1.28 : hasSelection ? 0.82 : 1, {
+        damping: 18,
+        stiffness: 180,
+      }),
+    );
+    return () => cancelAnimation(emphasis);
+  }, [emphasis, selected, hasSelection]);
 
   useEffect(() => {
     selection.value = withSpring(selected ? 1 : 0, {
@@ -225,9 +238,9 @@ export function PlayingCard({
         },
         {
           scale:
-            (1 +
-              selection.value * 0.06 +
-              (selected ? move * 0.69 : invitation * 0.025)) /
+            (emphasis.value * (1 - move) +
+              (selected ? 1.75 : 0.7) * move +
+              invitation * 0.015 * (1 - move)) /
             1.75,
         },
       ],

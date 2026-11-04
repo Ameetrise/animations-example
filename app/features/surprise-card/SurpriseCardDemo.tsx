@@ -209,6 +209,7 @@ export function SurpriseCardDemo({
                 onClaimMoney={() => setClaimingMoney(true)}
                 width={cardWidth}
                 selected={selectedCard === index}
+                hasSelection={selectedCard !== null}
                 progress={progress}
                 float={float}
                 shuffle={shuffle}
