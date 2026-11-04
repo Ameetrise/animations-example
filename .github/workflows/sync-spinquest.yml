@@ -24,6 +24,7 @@ jobs:
           persist-credentials: false
       - name: Publish shared code to SpinQuest
         env:
+          GH_TOKEN: ${{ github.token }}
           SPINQUEST_DEPLOY_KEY: ${{ secrets.SPINQUEST_DEPLOY_KEY }}
         run: |
           set -euo pipefail
@@ -32,8 +33,7 @@ jobs:
           chmod 700 "$RUNNER_TEMP/spinquest-ssh"
           printf '%s\n' "$SPINQUEST_DEPLOY_KEY" > "$RUNNER_TEMP/spinquest-ssh/key"
           chmod 600 "$RUNNER_TEMP/spinquest-ssh/key"
-          curl --fail --silent --show-error https://api.github.com/meta |
-            jq -r '.ssh_keys[] | "github.com " + .' > "$RUNNER_TEMP/spinquest-ssh/known_hosts"
+          gh api meta --jq '.ssh_keys[] | "github.com " + .' > "$RUNNER_TEMP/spinquest-ssh/known_hosts"
           export GIT_SSH_COMMAND="ssh -i $RUNNER_TEMP/spinquest-ssh/key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$RUNNER_TEMP/spinquest-ssh/known_hosts"
           git push git@github.com:Ameetrise/spinquest.git HEAD:refs/heads/master
       - name: Remove temporary key
