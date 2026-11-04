@@ -6,6 +6,7 @@ import type { ThemeColors } from "../theme/tokens";
 
 export type DemoProps = {
   colors: ThemeColors;
+  availableHeight: number;
   cartRef: RefObject<ComponentRef<typeof View> | null>;
   onAddedToCart: () => void;
   selectedCard: number | null;

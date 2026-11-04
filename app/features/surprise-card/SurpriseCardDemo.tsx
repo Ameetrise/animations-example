@@ -17,23 +17,26 @@ import Animated, {
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import type { DemoProps } from "../types";
+import { DepositAnimation } from "./DepositAnimation";
 import { PlayingCard } from "./PlayingCard";
 import { ShiningStar } from "./ShiningStar";
 
 const products = [
-  { name: "AirPods Max", icon: "headphones", suit: "♠" },
+  { name: "$500 cash reward", icon: "dollar-sign", suit: "♠" },
   { name: "AirPods Max", icon: "headphones", suit: "♥" },
   { name: "AirPods Max", icon: "headphones", suit: "♦" },
 ] as const;
 
 export function SurpriseCardDemo({
   colors,
+  availableHeight,
   cartRef,
   onAddedToCart,
   progress,
   selectedCard,
   onSelectCard,
 }: DemoProps) {
+  const [claimingMoney, setClaimingMoney] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
 
   function finishAdding() {
@@ -42,14 +45,16 @@ export function SurpriseCardDemo({
   }
 
   const { width } = useWindowDimensions();
-  const cardWidth = Math.min(96, (width - 80) / 3);
+  const compact = availableHeight < 460;
+  const tableHeight = Math.max(200, availableHeight - (compact ? 166 : 206));
+  const cardWidth = Math.min(96, (width - 80) / 3, (tableHeight - 72) / 2.8);
   const float = useSharedValue(0);
   const reduceMotion = useReducedMotion();
   const shuffle = useSharedValue(reduceMotion ? 1 : 0);
   const [isShuffling, setIsShuffling] = useState(!reduceMotion);
 
   useEffect(() => {
-    const step = { duration: 600, easing: Easing.inOut(Easing.sin) };
+    const step = { duration: 700, easing: Easing.inOut(Easing.sin) };
     shuffle.value = withSequence(
       withTiming(0.2, step),
       withTiming(0.4, step),
@@ -97,10 +102,12 @@ export function SurpriseCardDemo({
     ? "A little shuffle. A little suspense."
     : selectedCard === null
       ? "Which one is calling your name?"
-      : "Great pick. Press Play for the surprise.";
+      : "Great pick. Press Reveal for the surprise.";
   const message = addedToCart
     ? "In your cart. Nice pick!"
-    : "Tap the card. Make it yours.";
+    : selectedCard === 0
+      ? "Your reward is ready. Tap to collect."
+      : "Tap the card. Make it yours.";
 
   return (
     <View style={styles.container}>
@@ -122,36 +129,55 @@ export function SurpriseCardDemo({
         entering={FadeInDown.delay(140)
           .duration(500)
           .reduceMotion(ReduceMotion.System)}
-        style={[styles.title, { color: colors.text }]}
+        style={[
+          styles.title,
+          { color: colors.text },
+          compact && styles.compactTitle,
+        ]}
       >
-        One pick.{"\n"}
+        One pick.{compact ? " " : "\n"}
         <Text style={styles.accent}>A little magic.</Text>
       </Animated.Text>
-      <View style={styles.table}>
-        {products.map((product, index) => (
-          <PlayingCard
-            key={index}
-            index={index}
-            product={product}
-            cartRef={cartRef}
-            onAddedToCart={finishAdding}
-            width={cardWidth}
-            selected={selectedCard === index}
-            progress={progress}
-            float={float}
-            shuffle={shuffle}
-            disabled={isShuffling}
-            onPress={() => onSelectCard(index)}
-          />
-        ))}
-        {Array.from({ length: 8 }, (_, index) => (
-          <ShiningStar
-            key={index}
-            index={index}
-            progress={progress}
-            float={float}
-          />
-        ))}
+      <View style={[styles.table, { height: tableHeight }]}>
+        {claimingMoney ? (
+          <View
+            style={{
+              width: "100%",
+              height: 310,
+              transform: [{ scale: Math.min(1, tableHeight / 310) }],
+            }}
+          >
+            <DepositAnimation colors={colors} />
+          </View>
+        ) : (
+          <>
+            {products.map((product, index) => (
+              <PlayingCard
+                key={index}
+                index={index}
+                product={product}
+                cartRef={cartRef}
+                onAddedToCart={finishAdding}
+                onClaimMoney={() => setClaimingMoney(true)}
+                width={cardWidth}
+                selected={selectedCard === index}
+                progress={progress}
+                float={float}
+                shuffle={shuffle}
+                disabled={isShuffling}
+                onPress={() => onSelectCard(index)}
+              />
+            ))}
+            {Array.from({ length: 8 }, (_, index) => (
+              <ShiningStar
+                key={index}
+                index={index}
+                progress={progress}
+                float={float}
+              />
+            ))}
+          </>
+        )}
       </View>
       <View style={styles.footer}>
         <Animated.View style={[styles.copy, hintStyle]}>
@@ -175,7 +201,11 @@ export function SurpriseCardDemo({
         </Animated.View>
         <Animated.View style={[styles.copy, revealedStyle]}>
           <Text style={[styles.productName, { color: colors.text }]}>
-            {selectedCard === null ? "" : products[selectedCard].name}
+            {claimingMoney
+              ? "A little payday magic."
+              : selectedCard === null
+                ? ""
+                : products[selectedCard].name}
           </Text>
           <Animated.Text
             key={message}
@@ -184,7 +214,7 @@ export function SurpriseCardDemo({
             )}
             style={[styles.sample, { color: colors.muted }]}
           >
-            {message}
+            {claimingMoney ? "Printed. Approved. Collected." : message}
           </Animated.Text>
         </Animated.View>
       </View>
@@ -213,11 +243,12 @@ const styles = StyleSheet.create({
   },
   table: {
     width: "100%",
-    height: 280,
+    marginVertical: 10,
     alignItems: "center",
     justifyContent: "center",
   },
-  footer: { height: 64, width: "100%" },
+  compactTitle: { fontSize: 23, lineHeight: 29, marginTop: 10 },
+  footer: { height: 76, width: "100%" },
   copy: { position: "absolute", width: "100%", alignItems: "center", gap: 5 },
   productName: { fontSize: 21, fontWeight: "700" },
   hint: {

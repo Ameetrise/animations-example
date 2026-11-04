@@ -1,3 +1,4 @@
+import { Confetti } from "../features/surprise-card/Confetti";
 import type { ComponentRef } from "react";
 import Animated, {
   cancelAnimation,
@@ -25,6 +26,7 @@ type Props = {
 };
 
 export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
+  const [stageHeight, setStageHeight] = useState(500);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [round, setRound] = useState(0);
@@ -187,10 +189,16 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
               </Animated.View>
             </View>
           </View>
-          <View style={styles.stage}>
+          <View
+            style={styles.stage}
+            onLayout={(event) =>
+              setStageHeight(event.nativeEvent.layout.height)
+            }
+          >
             <View key={`${selectedDemo.id}-${round}`} style={styles.preview}>
               <Demo
                 colors={colors}
+                availableHeight={stageHeight - 48}
                 cartRef={cartRef}
                 onAddedToCart={addToCart}
                 progress={progress}
@@ -249,7 +257,7 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
               >
                 <Feather name="play" size={20} color={colors.text} />
                 <Text style={[styles.buttonText, { color: colors.text }]}>
-                  Play
+                  Reveal
                 </Text>
               </Pressable>
               <Pressable
@@ -265,6 +273,9 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
             </View>
           </View>
         </SafeAreaView>
+        {selectedIndex === 0 && selectedCard === 0 && (
+          <Confetti key={round} progress={progress} />
+        )}
       </Animated.View>
     </View>
   );

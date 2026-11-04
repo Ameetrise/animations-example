@@ -1,3 +1,4 @@
+import { CardBackDesign } from "./CardBackDesign";
 import type { ComponentRef } from "react";
 import { useEffect, useRef, type RefObject } from "react";
 import { scheduleOnRN } from "react-native-worklets";
@@ -18,6 +19,7 @@ import Animated, {
 type Props = {
   cartRef: RefObject<ComponentRef<typeof View> | null>;
   onAddedToCart: () => void;
+  onClaimMoney: () => void;
   index: number;
   width: number;
   selected: boolean;
@@ -25,7 +27,7 @@ type Props = {
   disabled: boolean;
   product: {
     name: string;
-    icon: "headphones" | "watch" | "speaker";
+    icon: "headphones" | "watch" | "speaker" | "dollar-sign";
     suit: string;
   };
   progress: SharedValue<number>;
@@ -37,6 +39,7 @@ export function PlayingCard({
   index,
   cartRef,
   onAddedToCart,
+  onClaimMoney,
   width,
   selected,
   shuffle,
@@ -73,6 +76,11 @@ export function PlayingCard({
   function handlePress() {
     if (progress.value < 1) {
       onPress();
+      return;
+    }
+    if (selected && !sent.current && product.icon === "dollar-sign") {
+      sent.current = true;
+      onClaimMoney();
       return;
     }
     if (!selected || sent.current || !cardRef.current || !cartRef.current)
@@ -149,8 +157,8 @@ export function PlayingCard({
               [
                 offset,
                 (index - 1) * 5,
-                side * width * 0.7,
-                -side * width * 0.7,
+                [-0.9, 0.75, 0][index] * width,
+                [0.75, 0, -0.9][index] * width,
                 (index - 1) * 5,
                 offset,
               ],
@@ -284,7 +292,9 @@ export function PlayingCard({
         accessibilityRole="button"
         accessibilityLabel={
           selected
-            ? "Selected card. After revealing, tap to add to cart"
+            ? product.icon === "dollar-sign"
+              ? "Selected card. After revealing, tap to collect your cash reward"
+              : "Selected card. After revealing, tap to add to cart"
             : `Pick card ${index + 1}`
         }
         accessibilityState={{ selected, disabled }}
@@ -297,10 +307,7 @@ export function PlayingCard({
             frontStyle,
           ]}
         >
-          <View style={styles.diamond}>
-            <Text style={styles.question}>?</Text>
-          </View>
-          <Text style={styles.brand}>Pack.com</Text>
+          <CardBackDesign width={renderWidth} />
           <Animated.View
             pointerEvents="none"
             style={[styles.shine, idleShineStyle]}
@@ -311,6 +318,7 @@ export function PlayingCard({
             styles.face,
             styles.back,
             product.icon === "headphones" && styles.photoBack,
+            product.icon === "dollar-sign" && styles.cashBack,
             backStyle,
           ]}
         >
@@ -324,10 +332,39 @@ export function PlayingCard({
               resizeMode="contain"
               accessibilityLabel="AirPods Max headphones"
             />
+          ) : product.icon === "dollar-sign" ? (
+            <View style={styles.moneyPrize}>
+              <View style={styles.rewardIcon}>
+                <Feather name="award" size={24} color="#E7BD62" />
+              </View>
+              <Text style={styles.moneyLabel}>YOU WON</Text>
+              <Text
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.5}
+                style={styles.moneyAmount}
+              >
+                $500
+              </Text>
+              <Text style={styles.moneyCaption}>A little lucky moment.</Text>
+            </View>
           ) : (
             <Feather name={product.icon} size={64} color="#9A3412" />
           )}
-          <Text style={styles.reveal}>YOUR PICK</Text>
+          {product.icon === "dollar-sign" ? (
+            <View style={styles.collect}>
+              <Text
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                style={styles.collectText}
+              >
+                Collect reward
+              </Text>
+              <Feather name="arrow-up-right" size={13} color="#153C2C" />
+            </View>
+          ) : (
+            <Text style={styles.reveal}>YOUR PICK</Text>
+          )}
           <Animated.View
             pointerEvents="none"
             style={[styles.shine, shineStyle]}
@@ -339,6 +376,55 @@ export function PlayingCard({
 }
 
 const styles = StyleSheet.create({
+  cashBack: { backgroundColor: "#153C2C", borderColor: "#D9B970", padding: 10 },
+  moneyPrize: {
+    width: "100%",
+    alignItems: "center",
+    gap: 6,
+    paddingBottom: 20,
+  },
+  rewardIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "#FFFFFF0D",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  moneyCaption: { color: "#CCE0D3", fontSize: 9, textAlign: "center" },
+  collect: {
+    position: "absolute",
+    bottom: 14,
+    left: 12,
+    right: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 3,
+    backgroundColor: "#E7BD62",
+    borderRadius: 14,
+    paddingVertical: 8,
+    paddingHorizontal: 5,
+  },
+  collectText: {
+    color: "#153C2C",
+    fontSize: 10,
+    fontWeight: "700",
+    flexShrink: 1,
+  },
+  moneyLabel: {
+    color: "#E7BD62",
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 1,
+  },
+  moneyAmount: {
+    width: "100%",
+    textAlign: "center",
+    color: "#FFFFFF",
+    fontSize: 42,
+    fontWeight: "800",
+  },
   card: { position: "absolute" },
   touch: { flex: 1 },
   face: {
@@ -354,7 +440,7 @@ const styles = StyleSheet.create({
     backfaceVisibility: "hidden",
     overflow: "hidden",
   },
-  front: { backgroundColor: "#7C2D12" },
+  front: { backgroundColor: "#182433" },
   back: {
     backgroundColor: "#FFF8E7",
     borderColor: "#E9C994",
@@ -362,17 +448,6 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   photoBack: { backgroundColor: "#FFFFFF" },
-  diamond: {
-    width: 77,
-    height: 101,
-    borderWidth: 1,
-    borderColor: "#E9C994",
-    borderRadius: 38,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  question: { color: "#FDE6B8", fontSize: 59, fontWeight: "700" },
-  brand: { color: "#FDE6B8", fontSize: 17, marginTop: 14, fontWeight: "700" },
   reveal: {
     position: "absolute",
     bottom: 24,
