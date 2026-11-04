@@ -12,7 +12,7 @@ import { Asset } from "expo-asset";
 import { useReducedMotion } from "react-native-reanimated";
 import { useFrame, useLoader, useThree } from "./renderer";
 
-import { WinningPrize } from "./WinningPrize";
+import { WinningPrize, type PrizePosition } from "./WinningPrize";
 import { RevealEffects } from "./RevealEffects";
 
 const modelUri = Asset.fromModule(
@@ -21,12 +21,21 @@ const modelUri = Asset.fromModule(
 
 type Props = {
   playing: boolean;
+  claimed: boolean;
+  onClaim: (position: PrizePosition) => void;
   onReady: () => void;
   onComplete: () => void;
   onReveal: () => void;
 };
 
-export function BoxModel({ playing, onReady, onComplete, onReveal }: Props) {
+export function BoxModel({
+  playing,
+  onReady,
+  onComplete,
+  onReveal,
+  claimed,
+  onClaim,
+}: Props) {
   const gltf = useLoader(GLTFLoader, modelUri);
   const { camera, size: viewport } = useThree();
   const reduceMotion = useReducedMotion();
@@ -115,6 +124,8 @@ export function BoxModel({ playing, onReady, onComplete, onReveal }: Props) {
       >
         <primitive object={model.scene} />
         <WinningPrize
+          claimed={claimed}
+          onClaim={onClaim}
           mixer={model.mixer}
           duration={model.action.getClip().duration}
           reduceMotion={reduceMotion}

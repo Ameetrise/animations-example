@@ -2,18 +2,7 @@ import { Component, type ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import type { DemoProps } from "../types";
 
-function ThreeDReveal(props: DemoProps) {
-  const { ThreeDRevealDemo } =
-    require("./ThreeDRevealDemo") as typeof import("./ThreeDRevealDemo");
-
-  if (typeof ThreeDRevealDemo !== "function") {
-    throw new Error(
-      "The 3D screen did not load correctly. Restart Metro with --clear.",
-    );
-  }
-
-  return <ThreeDRevealDemo {...props} />;
-}
+import { ThreeDRevealDemo } from "./ThreeDRevealDemo";
 
 class RendererBoundary extends Component<
   { children: ReactNode; textColor: string },
@@ -71,7 +60,7 @@ class RendererBoundary extends Component<
 export function ThreeDRevealEntry(props: DemoProps) {
   return (
     <RendererBoundary textColor={props.colors.text}>
-      <ThreeDReveal {...props} />
+      <ThreeDRevealDemo {...props} />
     </RendererBoundary>
   );
 }

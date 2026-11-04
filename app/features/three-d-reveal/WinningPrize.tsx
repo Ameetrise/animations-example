@@ -1,29 +1,34 @@
-import { useEffect, useMemo, useRef } from "react";
-import { Asset } from "expo-asset";
-import { AnimationMixer, Sprite, TextureLoader, SRGBColorSpace } from "three";
-import { useFrame, useLoader } from "./renderer";
+import { useMemo, useRef } from "react";
+import { AnimationMixer, Group, Vector3 } from "three";
+import { useFrame, useThree } from "./renderer";
+import { HeadphonesModel } from "./HeadphonesModel";
 
-const imageUri = Asset.fromModule(
-  require("../../../assets/airpods-max.webp"),
-).uri;
+export type PrizePosition = {
+  x: number;
+  y: number;
+  size: number;
+};
 
 type Props = {
   mixer: AnimationMixer;
   duration: number;
   reduceMotion: boolean;
+  claimed: boolean;
+  onClaim: (position: PrizePosition) => void;
 };
 
-export function WinningPrize({ mixer, duration, reduceMotion }: Props) {
-  const source = useLoader(TextureLoader, imageUri);
-  const image = useMemo(() => {
-    const texture = source.clone();
-    texture.colorSpace = SRGBColorSpace;
-    texture.needsUpdate = true;
-    return texture;
-  }, [source]);
-  const prize = useRef<Sprite>(null);
-
-  useEffect(() => () => image.dispose(), [image]);
+export function WinningPrize({
+  mixer,
+  duration,
+  reduceMotion,
+  claimed,
+  onClaim,
+}: Props) {
+  const prize = useRef<Group>(null);
+  const { camera, size } = useThree();
+  const world = useMemo(() => new Vector3(), []);
+  const top = useMemo(() => new Vector3(), []);
+  const worldScale = useMemo(() => new Vector3(), []);
 
   useFrame(() => {
     if (!prize.current) return;
@@ -33,21 +38,45 @@ export function WinningPrize({ mixer, duration, reduceMotion }: Props) {
         ? 1
         : Math.max(0, Math.min(1, elapsed / 2.2));
     const rise = 1 - Math.pow(1 - progress, 3);
-    prize.current.visible = elapsed >= 0;
+    prize.current.visible = elapsed >= 0 && !claimed;
     prize.current.position.y = 0.7 + rise * 3.2;
-    prize.current.material.opacity = Math.min(1, progress * 5);
-    prize.current.scale.set(2.05, 2.27, 1);
+    prize.current.rotation.y = reduceMotion ? 0.5 : (1 - rise) * -0.8 + 0.5;
   });
 
+  function claim() {
+    if (
+      !prize.current ||
+      claimed ||
+      mixer.time < duration + (reduceMotion ? 0 : 2.2)
+    )
+      return;
+    prize.current.getWorldPosition(world);
+    prize.current.getWorldScale(worldScale);
+    top
+      .copy(camera.up)
+      .applyQuaternion(camera.quaternion)
+      .multiplyScalar(1.1 * worldScale.y)
+      .add(world);
+    world.project(camera);
+    top.project(camera);
+    onClaim({
+      x: ((world.x + 1) * size.width) / 2,
+      y: ((1 - world.y) * size.height) / 2,
+      size: Math.max(24, Math.abs(top.y - world.y) * size.height),
+    });
+  }
+
   return (
-    <sprite ref={prize} visible={false} position={[0, 0.7, 0]}>
-      <spriteMaterial
-        map={image}
-        transparent
-        alphaTest={0.05}
-        depthWrite={false}
-        toneMapped={false}
-      />
-    </sprite>
+    <group
+      ref={prize}
+      visible={false}
+      position={[0, 0.7, 0]}
+      onClick={(event) => {
+        event.stopPropagation();
+        claim();
+      }}
+    >
+      <HeadphonesModel />
+    </group>
   );
 }

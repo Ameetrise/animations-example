@@ -4,6 +4,8 @@ import {
   Suspense,
   useCallback,
   useState,
+  useRef,
+  type ComponentRef,
   type ReactNode,
 } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
@@ -11,6 +13,8 @@ import { cancelAnimation, Easing, withTiming } from "react-native-reanimated";
 import type { DemoProps } from "../types";
 import { Canvas } from "./renderer";
 import { BoxModel } from "./BoxModel";
+import { PrizeCartFlight, type CartFlight } from "./PrizeCartFlight";
+import type { PrizePosition } from "./WinningPrize";
 import { palette } from "../../theme/colors";
 
 class ModelBoundary extends Component<
@@ -38,7 +42,44 @@ export function ThreeDRevealDemo({
   hasPlayed,
   onReveal,
   progress,
+  cartRef,
+  onAddedToCart,
 }: DemoProps) {
+  const viewportRef = useRef<ComponentRef<typeof View>>(null);
+  const claiming = useRef(false);
+  const [flight, setFlight] = useState<CartFlight | null>(null);
+  const [added, setAdded] = useState(false);
+
+  function claimPrize(position: PrizePosition) {
+    if (claiming.current || !viewportRef.current || !cartRef.current) return;
+    claiming.current = true;
+    viewportRef.current.measureInWindow((x, y) => {
+      if (!viewportRef.current || !cartRef.current) return;
+      cartRef.current.measureInWindow((cartX, cartY, width, height) => {
+        if (!viewportRef.current) return;
+        setFlight({
+          start: {
+            x: x + position.x,
+            y: y + position.y,
+            size: position.size,
+          },
+          end: {
+            x: cartX + width / 2,
+            y: cartY + height / 2,
+          },
+        });
+      });
+    });
+  }
+
+  function finishFlight() {
+    if (!claiming.current) return;
+    claiming.current = false;
+    setAdded(true);
+    setFlight(null);
+    onAddedToCart();
+  }
+
   const [ready, setReady] = useState(false);
   const [complete, setComplete] = useState(false);
   const onReady = useCallback(() => setReady(true), []);
@@ -77,6 +118,8 @@ export function ThreeDRevealDemo({
         {complete ? "You won AirPods Max!" : "A new dimension of surprise."}
       </Text>
       <View
+        ref={viewportRef}
+        collapsable={false}
         style={[
           styles.viewport,
           {
@@ -118,6 +161,8 @@ export function ThreeDRevealDemo({
             <Suspense fallback={null}>
               <BoxModel
                 playing={hasPlayed}
+                claimed={flight !== null || added}
+                onClaim={claimPrize}
                 onReady={onReady}
                 onComplete={onComplete}
                 onReveal={onReveal}
@@ -131,6 +176,7 @@ export function ThreeDRevealDemo({
           )}
         </ModelBoundary>
       </View>
+      {flight && <PrizeCartFlight flight={flight} onComplete={finishFlight} />}
       <Text
         accessibilityLiveRegion="polite"
         style={[
@@ -142,11 +188,13 @@ export function ThreeDRevealDemo({
       >
         {!ready
           ? "Loading your box…"
-          : complete
-            ? "Your surprise has arrived. Celebrate!"
-            : hasPlayed
-              ? "Watch the flaps unfold…"
-              : "Tap the box or press Reveal."}
+          : added
+            ? "AirPods Max added to your cart."
+            : complete
+              ? "Tap your headphones to add them to your cart."
+              : hasPlayed
+                ? "Watch the flaps unfold…"
+                : "Tap the box or press Reveal."}
       </Text>
     </View>
   );

@@ -10,7 +10,7 @@ module.exports = defineConfig([
       "@typescript-eslint/no-require-imports": [
         "error",
         {
-          allow: ["\\.(glb|webp)$", "^\\./ThreeDRevealDemo$"],
+          allow: ["\\.(glb|webp)$"],
         },
       ],
     },
