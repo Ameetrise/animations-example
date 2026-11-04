@@ -1,5 +1,5 @@
 export const lightColors = {
-  background: "#F5F5F7",
+  background: "#FAF7F1",
   surface: "#FFFFFF",
   text: "#202124",
   muted: "#63666D",
@@ -7,7 +7,7 @@ export const lightColors = {
 };
 
 export const darkColors = {
-  background: "#121212",
+  background: "#14151F",
   surface: "#202124",
   text: "#F5F5F7",
   muted: "#B5B7BD",

@@ -1,132 +1,229 @@
-import Animated, { useAnimatedStyle } from "react-native-reanimated";
-import Feather from "@expo/vector-icons/Feather";
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import Animated, {
+  cancelAnimation,
+  Easing,
+  FadeInDown,
+  FadeOutUp,
+  ReduceMotion,
+  interpolate,
+  interpolateColor,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import type { DemoProps } from "../types";
+import { PlayingCard } from "./PlayingCard";
+import { ShiningStar } from "./ShiningStar";
 
-export function SurpriseCardDemo({ colors, progress }: DemoProps) {
-  const frontStyle = useAnimatedStyle(() => ({
-    opacity: progress.value < 0.5 ? 1 : 0,
+const products = [
+  { name: "AirPods Max", icon: "headphones", suit: "♠" },
+  { name: "AirPods Max", icon: "headphones", suit: "♥" },
+  { name: "AirPods Max", icon: "headphones", suit: "♦" },
+] as const;
+
+export function SurpriseCardDemo({
+  colors,
+  cartRef,
+  onAddedToCart,
+  progress,
+  selectedCard,
+  onSelectCard,
+}: DemoProps) {
+  const [addedToCart, setAddedToCart] = useState(false);
+
+  function finishAdding() {
+    setAddedToCart(true);
+    onAddedToCart();
+  }
+
+  const { width } = useWindowDimensions();
+  const cardWidth = Math.min(96, (width - 80) / 3);
+  const float = useSharedValue(0);
+  const reduceMotion = useReducedMotion();
+  const shuffle = useSharedValue(reduceMotion ? 1 : 0);
+  const [isShuffling, setIsShuffling] = useState(!reduceMotion);
+
+  useEffect(() => {
+    const step = { duration: 600, easing: Easing.inOut(Easing.sin) };
+    shuffle.value = withSequence(
+      withTiming(0.2, step),
+      withTiming(0.4, step),
+      withTiming(0.6, step),
+      withTiming(0.8, step),
+      withTiming(1, step, (finished) => {
+        if (finished) scheduleOnRN(setIsShuffling, false);
+      }),
+    );
+    return () => cancelAnimation(shuffle);
+  }, [shuffle]);
+
+  useEffect(() => {
+    if (!reduceMotion)
+      float.value = withRepeat(
+        withTiming(Math.PI * 2, { duration: 4800, easing: Easing.linear }),
+        -1,
+        false,
+      );
+    return () => cancelAnimation(float);
+  }, [float, reduceMotion]);
+
+  const brandStyle = useAnimatedStyle(() => ({
+    color: interpolateColor(
+      (Math.sin(float.value) + 1) / 2,
+      [0, 1],
+      [colors.text, "#C77A18"],
+    ),
+  }));
+  const hintStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.value, [0.35, 0.5], [1, 0], "clamp"),
     transform: [
-      { perspective: 1000 },
-      { rotateY: `${progress.value * 180}deg` },
+      {
+        translateY: interpolate(progress.value, [0.35, 0.5], [0, -8], "clamp"),
+      },
     ],
   }));
-  const backStyle = useAnimatedStyle(() => ({
-    opacity: progress.value >= 0.5 ? 1 : 0,
+  const revealedStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.value, [0.6, 0.8], [0, 1], "clamp"),
     transform: [
-      { perspective: 1000 },
-      { rotateY: `${180 + progress.value * 180}deg` },
+      { translateY: interpolate(progress.value, [0.6, 0.8], [12, 0], "clamp") },
     ],
   }));
+  const hint = isShuffling
+    ? "A little shuffle. A little suspense."
+    : selectedCard === null
+      ? "Which one is calling your name?"
+      : "Great pick. Press Play for the surprise.";
+  const message = addedToCart
+    ? "In your cart. Nice pick!"
+    : "Tap the card. Make it yours.";
 
   return (
-    <View style={styles.card}>
-      <Animated.View style={[styles.face, styles.front, frontStyle]}>
-        <Text style={styles.brand}>Pack.com</Text>
-        <View style={styles.gift}>
-          <Feather name="gift" size={64} color="#FFFFFF" />
-        </View>
-        <Text style={styles.frontTitle}>A little surprise.</Text>
-        <Text style={styles.frontCaption}>Press Play to see what's inside</Text>
-      </Animated.View>
-
+    <View style={styles.container}>
       <Animated.View
-        style={[
-          styles.face,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-          backStyle,
-        ]}
+        entering={FadeInDown.duration(450).reduceMotion(ReduceMotion.System)}
+        style={styles.brandRow}
       >
-        <Text style={[styles.brand, { color: colors.text }]}>Pack.com</Text>
-        <View style={styles.product}>
-          <Feather name="headphones" size={64} color="#C2410C" />
+        <Animated.Text style={[styles.brand, brandStyle]}>
+          Pack.com
+        </Animated.Text>
+        <View style={[styles.badge, { borderColor: colors.border }]}>
+          <Text style={[styles.eyebrow, { color: colors.muted }]}>
+            SURPRISE PICKS
+          </Text>
         </View>
-        <Text style={styles.eyebrow}>SURPRISE REVEALED</Text>
-        <Text style={[styles.productTitle, { color: colors.text }]}>
-          Wireless headphones
-        </Text>
-        <Text style={[styles.caption, { color: colors.muted }]}>
-          Your next everyday favorite.
-        </Text>
-        <Text style={[styles.sample, { color: colors.muted }]}>
-          Sample product
-        </Text>
       </Animated.View>
+      <Animated.Text
+        accessibilityRole="header"
+        entering={FadeInDown.delay(140)
+          .duration(500)
+          .reduceMotion(ReduceMotion.System)}
+        style={[styles.title, { color: colors.text }]}
+      >
+        One pick.{"\n"}
+        <Text style={styles.accent}>A little magic.</Text>
+      </Animated.Text>
+      <View style={styles.table}>
+        {products.map((product, index) => (
+          <PlayingCard
+            key={index}
+            index={index}
+            product={product}
+            cartRef={cartRef}
+            onAddedToCart={finishAdding}
+            width={cardWidth}
+            selected={selectedCard === index}
+            progress={progress}
+            float={float}
+            shuffle={shuffle}
+            disabled={isShuffling}
+            onPress={() => onSelectCard(index)}
+          />
+        ))}
+        {Array.from({ length: 8 }, (_, index) => (
+          <ShiningStar
+            key={index}
+            index={index}
+            progress={progress}
+            float={float}
+          />
+        ))}
+      </View>
+      <View style={styles.footer}>
+        <Animated.View style={[styles.copy, hintStyle]}>
+          <Animated.Text
+            key={hint}
+            entering={FadeInDown.duration(250).reduceMotion(
+              ReduceMotion.System,
+            )}
+            exiting={FadeOutUp.duration(150).reduceMotion(ReduceMotion.System)}
+            style={[styles.hint, { color: colors.text }]}
+          >
+            {hint}
+          </Animated.Text>
+          <Text style={[styles.sample, { color: colors.muted }]}>
+            {isShuffling
+              ? "Your surprise is getting ready"
+              : selectedCard === null
+                ? "Tap one of the three cards"
+                : "Your reveal is one tap away"}
+          </Text>
+        </Animated.View>
+        <Animated.View style={[styles.copy, revealedStyle]}>
+          <Text style={[styles.productName, { color: colors.text }]}>
+            {selectedCard === null ? "" : products[selectedCard].name}
+          </Text>
+          <Animated.Text
+            key={message}
+            entering={FadeInDown.duration(250).reduceMotion(
+              ReduceMotion.System,
+            )}
+            style={[styles.sample, { color: colors.muted }]}
+          >
+            {message}
+          </Animated.Text>
+        </Animated.View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    width: "100%",
-    maxWidth: 300,
-    height: 360,
-    alignSelf: "center",
-  },
-  face: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    borderRadius: 28,
+  container: { alignItems: "center", width: "100%" },
+  brandRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  brand: { fontSize: 23, fontWeight: "800", letterSpacing: -0.8 },
+  badge: {
     borderWidth: 1,
-    padding: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backfaceVisibility: "hidden",
+    borderRadius: 20,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
   },
-  front: {
-    backgroundColor: "#C2410C",
-    borderColor: "#EA580C",
-  },
-  brand: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "800",
-  },
-  gift: {
-    padding: 20,
-    borderRadius: 80,
-    backgroundColor: "#FFFFFF20",
-    marginVertical: 8,
-  },
-  frontTitle: {
-    color: "#FFFFFF",
-    fontSize: 26,
+  eyebrow: { fontSize: 9, fontWeight: "700", letterSpacing: 1.2 },
+  accent: { color: "#C77A18" },
+  title: {
+    fontSize: 28,
     fontWeight: "700",
     textAlign: "center",
+    marginTop: 12,
+    lineHeight: 33,
   },
-  frontCaption: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    textAlign: "center",
-  },
-  product: {
-    width: 110,
-    height: 100,
-    borderRadius: 24,
-    backgroundColor: "#FFF0E6",
+  table: {
+    width: "100%",
+    height: 280,
     alignItems: "center",
     justifyContent: "center",
   },
-  eyebrow: {
-    color: "#C2410C",
-    fontSize: 11,
-    fontWeight: "800",
-    letterSpacing: 1.5,
-  },
-  productTitle: {
-    fontSize: 22,
-    fontWeight: "700",
+  footer: { height: 64, width: "100%" },
+  copy: { position: "absolute", width: "100%", alignItems: "center", gap: 5 },
+  productName: { fontSize: 21, fontWeight: "700" },
+  hint: {
     textAlign: "center",
+    fontSize: 15,
+    lineHeight: 24,
   },
-  caption: {
-    fontSize: 14,
-    textAlign: "center",
-  },
-  sample: {
-    fontSize: 11,
-  },
+  sample: { fontSize: 12, textAlign: "center" },
 });
