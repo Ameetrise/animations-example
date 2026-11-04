@@ -4,6 +4,18 @@ const expoConfig = require("eslint-config-expo/flat");
 module.exports = defineConfig([
   expoConfig,
   {
+    files: ["app/features/three-d-reveal/**/*.tsx"],
+    rules: {
+      "react/no-unknown-property": "off",
+      "@typescript-eslint/no-require-imports": [
+        "error",
+        {
+          allow: ["\\.glb$"],
+        },
+      ],
+    },
+  },
+  {
     ignores: ["dist/**"],
   },
   {

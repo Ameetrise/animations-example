@@ -2,6 +2,8 @@ import type { ComponentType } from "react";
 import { MysteryBoxDemo } from "./mystery-box/MysteryBoxDemo";
 import { SurpriseCardDemo } from "./surprise-card/SurpriseCardDemo";
 
+import { ThreeDRevealDemo } from "./three-d-reveal/ThreeDRevealDemo";
+
 import type { DemoProps } from "./types";
 
 type Demo = {
@@ -23,5 +25,11 @@ export const demos: readonly Demo[] = [
     title: "Mystery box",
     description: "A box opening with a surprise inside.",
     Component: MysteryBoxDemo,
+  },
+  {
+    id: "three-d-reveal",
+    title: "3D reveal",
+    description: "A real 3D box with animated folding flaps.",
+    Component: ThreeDRevealDemo,
   },
 ];
