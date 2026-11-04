@@ -1,3 +1,4 @@
+import { HowItWorks } from "../components/HowItWorks";
 import { WinningSound } from "../components/WinningSound";
 import { palette } from "../theme/colors";
 import { Confetti } from "../features/surprise-card/Confetti";
@@ -34,6 +35,7 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
   const [round, setRound] = useState(0);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [showExplanation, setShowExplanation] = useState(false);
   const cartRef = useRef<ComponentRef<typeof View>>(null);
   const cartScale = useSharedValue(1);
   const progress = useSharedValue(0);
@@ -176,6 +178,11 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
 
   return (
     <View style={styles.backdrop}>
+      <HowItWorks
+        visible={showExplanation}
+        onClose={() => setShowExplanation(false)}
+        colors={colors}
+      />
       <Animated.View style={[styles.screen, fadeStyle]}>
         <SafeAreaView
           style={[
@@ -189,6 +196,20 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
           <View style={styles.header}>
             <FpsCounter colors={colors} />
             <View style={styles.headerActions}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="How the animations work"
+                onPress={() => setShowExplanation(true)}
+                style={[
+                  styles.themeButton,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: colors.border,
+                  },
+                ]}
+              >
+                <Feather name="help-circle" size={24} color={colors.text} />
+              </Pressable>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={
@@ -395,6 +416,8 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: spacing.large,

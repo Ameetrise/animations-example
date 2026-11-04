@@ -96,7 +96,7 @@ export function BoxPrize({ progress, cartRef, onAddedToCart, scale }: Props) {
               : interpolate(
                   progress.value,
                   [0.45, 0.95, 1],
-                  [242, 28, 32],
+                  [252, 0, 0],
                   "clamp",
                 )) +
             (reduceMotion
@@ -168,10 +168,10 @@ export function BoxPrize({ progress, cartRef, onAddedToCart, scale }: Props) {
 const styles = StyleSheet.create({
   window: {
     position: "absolute",
-    top: 10,
+    top: 0,
     left: 35,
     width: 210,
-    height: 242,
+    height: 252,
   },
   prizeContainer: {
     width: 210,

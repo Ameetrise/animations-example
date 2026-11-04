@@ -46,17 +46,10 @@ function FlyingHeadphones({ flight, onComplete, onVisible }: Props) {
     if (renderedFrames.current < 3) return;
     if (renderedFrames.current === 3) onVisible();
     elapsed.current += Math.min(delta, 0.05);
-    const t = Math.min(elapsed.current / (reduceMotion ? 0.25 : 4.6), 1);
-    const zoom = Math.min(t / 0.18, 1);
+    const t = Math.min(elapsed.current / (reduceMotion ? 0.25 : 3.2), 1);
+    const zoom = Math.min(t / 0.25, 1);
     const zoomEase = 1 - Math.pow(1 - zoom, 3);
-    const brandIn = MathUtils.clamp((t - 0.18) / 0.18, 0, 1);
-    const brandOut = MathUtils.clamp((t - 0.64) / 0.16, 0, 1);
-    const brandZoom =
-      brandIn *
-      brandIn *
-      (3 - 2 * brandIn) *
-      (1 - brandOut * brandOut * (3 - 2 * brandOut));
-    const travel = Math.max(0, (t - 0.8) / 0.2);
+    const travel = Math.max(0, (t - 0.65) / 0.35);
     const ease = travel * travel * (3 - 2 * travel);
     const focusX = width / 2;
     const focusY = height * 0.42;
@@ -69,18 +62,12 @@ function FlyingHeadphones({ flight, onComplete, onVisible }: Props) {
       width * 0.75,
       height * 0.4,
     );
-    const displaySize =
-      MathUtils.lerp(flight.start.size, focusSize, zoomEase) *
-      (1 + brandZoom * 1.8);
-    const brandOffsetY = reduceMotion
-      ? 0
-      : (0.56 * displaySize * brandZoom) / 2.2;
+    const displaySize = MathUtils.lerp(flight.start.size, focusSize, zoomEase);
     group.current.position.set(
       (reduceMotion ? flight.start.x : x) - width / 2,
       height / 2 -
         (reduceMotion ? flight.start.y : y) +
-        Math.sin(travel * Math.PI) * 55 +
-        brandOffsetY,
+        Math.sin(travel * Math.PI) * 55,
       0,
     );
     group.current.quaternion.slerpQuaternions(
