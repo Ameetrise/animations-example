@@ -33,6 +33,13 @@ function Piece({
 }) {
   const [seed] = useState(() => ({
     x: Math.random(),
+    startY: -Math.random() * 0.4,
+    duration: 0.55 + Math.random() * 0.25,
+    fall: 1.2 + Math.random() * 0.65,
+    sway: 20 + Math.random() * 65,
+    frequency: 1.2 + Math.random() * 3,
+    phase: Math.random() * Math.PI * 2,
+    tumble: Math.random() * 900 - 450,
     delay: Math.random() * 0.2,
     drift: Math.random() * 100 - 50,
     spin: Math.random() * 900 - 450,
@@ -41,7 +48,7 @@ function Piece({
   const style = useAnimatedStyle(() => {
     const t = Math.max(
       0,
-      Math.min(1, (burst.value - seed.delay) / (1 - seed.delay)),
+      Math.min(1, (burst.value - seed.delay) / seed.duration),
     );
     return {
       opacity: interpolate(t, [0, 0.02, 0.85, 1], [0, 1, 1, 0]),
@@ -49,12 +56,19 @@ function Piece({
         {
           translateX:
             seed.x * width +
-            Math.sin(t * Math.PI * 3 + index) * 22 +
+            Math.sin(t * Math.PI * seed.frequency + seed.phase) * seed.sway +
             seed.drift * t,
         },
-        { translateY: -30 + t * (height + 100) },
+        {
+          translateY:
+            seed.startY * height -
+            20 +
+            (t * 0.55 + t * t * 0.45) * height * seed.fall +
+            Math.sin(t * Math.PI * 4 + seed.phase) * 14,
+        },
         { rotate: `${t * seed.spin}deg` },
-        { rotateX: `${t * 720}deg` },
+        { rotateX: `${t * seed.tumble}deg` },
+        { rotateY: `${Math.sin(t * Math.PI * seed.frequency) * 65}deg` },
       ],
     };
   });
@@ -113,5 +127,9 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     zIndex: 20,
   },
-  piece: { position: "absolute", top: 0, left: 0 },
+  piece: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+  },
 });

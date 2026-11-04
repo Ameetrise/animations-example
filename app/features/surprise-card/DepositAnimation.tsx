@@ -12,11 +12,40 @@ import Animated, {
   useSharedValue,
   withSequence,
   withTiming,
+  type SharedValue,
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import type { ThemeColors } from "../../theme/tokens";
 
 type Props = { colors: ThemeColors };
+
+function TransferSpark({
+  index,
+  progress,
+}: {
+  index: number;
+  progress: SharedValue<number>;
+}) {
+  const style = useAnimatedStyle(() => {
+    const t = interpolate(
+      progress.value,
+      [0.62 + index * 0.02, 0.9 + index * 0.01],
+      [0, 1],
+      "clamp",
+    );
+    return {
+      opacity: interpolate(t, [0, 0.15, 0.8, 1], [0, 0.8, 0.8, 0]),
+      transform: [
+        { translateX: Math.sin(t * Math.PI) * (index % 2 ? 30 : -30) },
+        { translateY: t * 100 },
+        { scale: 1 - t * 0.6 },
+      ],
+    };
+  });
+  return (
+    <Animated.View pointerEvents="none" style={[styles.transferSpark, style]} />
+  );
+}
 
 export function DepositAnimation({ colors }: Props) {
   const progress = useSharedValue(0);
@@ -58,14 +87,71 @@ export function DepositAnimation({ colors }: Props) {
     ],
   }));
 
+  const printerStyle = useAnimatedStyle(() => ({
+    opacity:
+      progress.value < 0.35
+        ? 0.4 + Math.abs(Math.sin(progress.value * 70)) * 0.6
+        : 1,
+  }));
+  const stampToolStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      progress.value,
+      [0.35, 0.38, 0.52, 0.58],
+      [0, 1, 1, 0],
+      "clamp",
+    ),
+    transform: [
+      {
+        translateY: interpolate(
+          progress.value,
+          [0.35, 0.46, 0.49, 0.58],
+          [-45, 0, -3, -40],
+          "clamp",
+        ),
+      },
+      { rotate: "-12deg" },
+      {
+        scale: interpolate(
+          progress.value,
+          [0.35, 0.46, 0.49, 0.58],
+          [1.2, 0.95, 1, 1.1],
+          "clamp",
+        ),
+      },
+    ],
+  }));
+  const impactStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      progress.value,
+      [0.45, 0.47, 0.58],
+      [0, 0.6, 0],
+      "clamp",
+    ),
+    transform: [
+      { scale: interpolate(progress.value, [0.45, 0.58], [0.3, 1.5], "clamp") },
+    ],
+  }));
+  const balanceStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateY: interpolate(
+          progress.value,
+          [0.9, 0.94, 1],
+          [0, -5, 0],
+          "clamp",
+        ),
+      },
+    ],
+  }));
+
   const checkStyle = useAnimatedStyle(() => ({
     opacity: interpolate(progress.value, [0, 0.85, 0.9, 1], [1, 1, 0, 0]),
     transform: [
       {
         translateY: interpolate(
           progress.value,
-          [0, 0.35, 0.6, 0.9],
-          [-115, 12, 12, 144],
+          [0, 0.35, 0.6, 0.67, 0.9],
+          [-115, 12, 12, -4, 144],
           "clamp",
         ),
       },
@@ -79,8 +165,8 @@ export function DepositAnimation({ colors }: Props) {
       {
         scale: interpolate(
           progress.value,
-          [0, 0.6, 0.9, 1],
-          [1, 1, 0.15, 0.15],
+          [0, 0.6, 0.67, 0.9, 1],
+          [1, 1, 1.02, 0.15, 0.15],
         ),
       },
       {
@@ -156,7 +242,7 @@ export function DepositAnimation({ colors }: Props) {
         <Text style={[styles.printerLabel, { color: colors.muted }]}>
           PACK REWARDS
         </Text>
-        <View style={styles.indicator} />
+        <Animated.View style={[styles.indicator, printerStyle]} />
       </View>
       <View style={[styles.slot, { backgroundColor: colors.text }]} />
       <View pointerEvents="none" style={styles.paperWindow}>
@@ -174,6 +260,22 @@ export function DepositAnimation({ colors }: Props) {
           </Animated.View>
         </Animated.View>
       </View>
+      <Animated.View
+        pointerEvents="none"
+        style={[styles.stampImpact, impactStyle]}
+      />
+      <Animated.View
+        pointerEvents="none"
+        style={[styles.stampTool, stampToolStyle]}
+      >
+        <View style={styles.stampHandle} />
+        <View style={styles.stampBase}>
+          <Text style={styles.stampToolText}>PACK</Text>
+        </View>
+      </Animated.View>
+      {Array.from({ length: 6 }, (_, index) => (
+        <TransferSpark key={index} index={index} progress={progress} />
+      ))}
       <Animated.View
         pointerEvents="none"
         style={[styles.bankHalo, haloStyle]}
@@ -197,9 +299,11 @@ export function DepositAnimation({ colors }: Props) {
           <Text style={[styles.bankLabel, { color: colors.muted }]}>
             AVAILABLE BALANCE
           </Text>
-          <Text style={[styles.balance, { color: colors.text }]}>
+          <Animated.Text
+            style={[styles.balance, { color: colors.text }, balanceStyle]}
+          >
             ${balance.toFixed(2)}
-          </Text>
+          </Animated.Text>
         </View>
         {deposited && (
           <Animated.Text
@@ -217,6 +321,57 @@ export function DepositAnimation({ colors }: Props) {
 }
 
 const styles = StyleSheet.create({
+  stampTool: {
+    position: "absolute",
+    top: 100,
+    right: "15%",
+    alignItems: "center",
+    zIndex: 4,
+  },
+  stampHandle: {
+    width: 26,
+    height: 23,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    backgroundColor: "#8D572F",
+  },
+  stampBase: {
+    width: 85,
+    height: 26,
+    borderRadius: 5,
+    backgroundColor: "#244A37",
+    alignItems: "center",
+    justifyContent: "center",
+    borderBottomWidth: 4,
+    borderBottomColor: "#183626",
+  },
+  stampToolText: {
+    color: "#E7BD62",
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 2,
+  },
+  stampImpact: {
+    position: "absolute",
+    top: 102,
+    right: "13%",
+    width: 95,
+    height: 70,
+    borderRadius: 48,
+    borderWidth: 2,
+    borderColor: "#65BB85",
+    zIndex: 3,
+  },
+  transferSpark: {
+    position: "absolute",
+    top: 150,
+    alignSelf: "center",
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#76C89A",
+    zIndex: 3,
+  },
   scene: { width: "100%", height: 310, alignItems: "center" },
   status: { height: 26, width: "100%" },
   statusText: {

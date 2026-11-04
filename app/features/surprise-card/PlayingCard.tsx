@@ -1,3 +1,4 @@
+import { PaperPlane } from "./PaperPlane";
 import { CardBackDesign } from "./CardBackDesign";
 import type { ComponentRef } from "react";
 import { useEffect, useRef, type RefObject } from "react";
@@ -93,10 +94,17 @@ export function PlayingCard({
           flightX.value = cartX + cartWidth / 2 - x - width / 2;
           flightY.value = cartY + cartHeight / 2 - y - height / 2;
           flight.value = withSequence(
-            withTiming(0.2, { duration: 260, easing: Easing.out(Easing.quad) }),
+            withTiming(0.32, {
+              duration: 430,
+              easing: Easing.inOut(Easing.quad),
+            }),
+            withTiming(0.45, {
+              duration: 180,
+              easing: Easing.out(Easing.quad),
+            }),
             withTiming(
               1,
-              { duration: 430, easing: Easing.in(Easing.cubic) },
+              { duration: 550, easing: Easing.in(Easing.cubic) },
               (finished) => {
                 if (finished) scheduleOnRN(onAddedToCart);
               },
@@ -113,8 +121,8 @@ export function PlayingCard({
       const distance = Math.max(Math.hypot(flightX.value, flightY.value), 1);
       const travel = interpolate(
         flight.value,
-        [0, 0.2, 1],
-        [0, -32 / distance, 1],
+        [0, 0.32, 0.45, 1],
+        [0, 0, -24 / distance, 1],
       );
       return {
         zIndex: 10,
@@ -128,13 +136,13 @@ export function PlayingCard({
               Math.sin(Math.max(0, travel) * Math.PI) * 35,
           },
           {
-            rotate: `${interpolate(flight.value, [0, 0.2, 0.55, 1], [0, 7, -12, 0])}deg`,
+            rotate: `${interpolate(flight.value, [0, 0.32, 0.45, 0.75, 1], [0, -6, 5, -8, 0])}deg`,
           },
           {
             scale: interpolate(
               flight.value,
-              [0, 0.2, 0.45, 1],
-              [1, 0.94, 1, 0.08],
+              [0, 0.32, 0.45, 1],
+              [1, 1, 0.94, 0.12],
             ),
           },
         ],
@@ -239,6 +247,23 @@ export function PlayingCard({
             },
           ],
   }));
+  const foldStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(flight.value, [0, 0.22, 0.32], [1, 1, 0], "clamp"),
+    transform:
+      flight.value === 0
+        ? []
+        : [
+            { perspective: 900 },
+            {
+              rotateY: `${interpolate(flight.value, [0, 0.32], [0, 65], "clamp")}deg`,
+            },
+            {
+              scaleX: interpolate(flight.value, [0, 0.32], [1, 0.08], "clamp"),
+            },
+            { scaleY: interpolate(flight.value, [0, 0.32], [1, 0.5], "clamp") },
+          ],
+  }));
+
   const idleShineStyle = useAnimatedStyle(() => ({
     opacity: progress.value === 0 ? 0.16 : 0,
     transform: [
@@ -313,69 +338,80 @@ export function PlayingCard({
             style={[styles.shine, idleShineStyle]}
           />
         </Animated.View>
-        <Animated.View
-          style={[
-            styles.face,
-            styles.back,
-            product.icon === "headphones" && styles.photoBack,
-            product.icon === "dollar-sign" && styles.cashBack,
-            backStyle,
-          ]}
-        >
-          {product.icon === "headphones" ? (
-            <Image
-              source={require("../../../assets/airpod-max.jpeg")}
-              style={{
-                width: Math.round(renderWidth * 0.82),
-                height: Math.round(renderWidth * 0.82 * (636 / 752)),
-              }}
-              resizeMode="contain"
-              accessibilityLabel="AirPods Max headphones"
-            />
-          ) : product.icon === "dollar-sign" ? (
-            <View style={styles.moneyPrize}>
-              <View style={styles.rewardIcon}>
-                <Feather name="award" size={24} color="#E7BD62" />
-              </View>
-              <Text style={styles.moneyLabel}>YOU WON</Text>
-              <Text
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.5}
-                style={styles.moneyAmount}
-              >
-                $500
-              </Text>
-              <Text style={styles.moneyCaption}>A little lucky moment.</Text>
-            </View>
-          ) : (
-            <Feather name={product.icon} size={64} color="#9A3412" />
-          )}
-          {product.icon === "dollar-sign" ? (
-            <View style={styles.collect}>
-              <Text
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                style={styles.collectText}
-              >
-                Collect reward
-              </Text>
-              <Feather name="arrow-up-right" size={13} color="#153C2C" />
-            </View>
-          ) : (
-            <Text style={styles.reveal}>YOUR PICK</Text>
-          )}
+        <Animated.View style={[styles.foldLayer, foldStyle]}>
           <Animated.View
-            pointerEvents="none"
-            style={[styles.shine, shineStyle]}
-          />
+            style={[
+              styles.face,
+              styles.back,
+              product.icon === "headphones" && styles.photoBack,
+              product.icon === "dollar-sign" && styles.cashBack,
+              backStyle,
+            ]}
+          >
+            {product.icon === "headphones" ? (
+              <Image
+                source={require("../../../assets/airpod-max.jpeg")}
+                style={{
+                  width: Math.round(renderWidth * 0.82),
+                  height: Math.round(renderWidth * 0.82 * (636 / 752)),
+                }}
+                resizeMode="contain"
+                accessibilityLabel="AirPods Max headphones"
+              />
+            ) : product.icon === "dollar-sign" ? (
+              <View style={styles.moneyPrize}>
+                <View style={styles.rewardIcon}>
+                  <Feather name="award" size={24} color="#E7BD62" />
+                </View>
+                <Text style={styles.moneyLabel}>YOU WON</Text>
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.5}
+                  style={styles.moneyAmount}
+                >
+                  $500
+                </Text>
+                <Text style={styles.moneyCaption}>A little lucky moment.</Text>
+              </View>
+            ) : (
+              <Feather name={product.icon} size={64} color="#9A3412" />
+            )}
+            {product.icon === "dollar-sign" ? (
+              <View style={styles.collect}>
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  style={styles.collectText}
+                >
+                  Collect reward
+                </Text>
+                <Feather name="arrow-up-right" size={13} color="#153C2C" />
+              </View>
+            ) : (
+              <Text style={styles.reveal}>YOUR PICK</Text>
+            )}
+            <Animated.View
+              pointerEvents="none"
+              style={[styles.shine, shineStyle]}
+            />
+          </Animated.View>
         </Animated.View>
+        {product.icon === "headphones" && (
+          <PaperPlane
+            flight={flight}
+            flightX={flightX}
+            flightY={flightY}
+            size={renderWidth * 0.8}
+          />
+        )}
       </Pressable>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
+  foldLayer: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0 },
   cashBack: { backgroundColor: "#153C2C", borderColor: "#D9B970", padding: 10 },
   moneyPrize: {
     width: "100%",
