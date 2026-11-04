@@ -104,7 +104,10 @@ export function PlayingCard({
             }),
             withTiming(
               1,
-              { duration: 550, easing: Easing.in(Easing.cubic) },
+              {
+                duration: 550,
+                easing: Easing.in(Easing.cubic),
+              },
               (finished) => {
                 if (finished) scheduleOnRN(onAddedToCart);
               },
@@ -128,7 +131,9 @@ export function PlayingCard({
         zIndex: 10,
         opacity: interpolate(flight.value, [0, 0.85, 1], [1, 1, 0]),
         transform: [
-          { translateX: flightX.value * travel },
+          {
+            translateX: flightX.value * travel,
+          },
           {
             translateY:
               -12 +
@@ -189,7 +194,9 @@ export function PlayingCard({
           {
             rotate: `${interpolate(shuffle.value, [0, 0.2, 0.4, 0.6, 0.8, 1], [(index - 1) * 9, 0, side * -8, side * 8, 0, (index - 1) * 9 + wave * 3])}deg`,
           },
-          { scale: (1 + invitation * 0.025) / 1.75 },
+          {
+            scale: (1 + invitation * 0.025) / 1.75,
+          },
         ],
       };
     }
@@ -229,7 +236,9 @@ export function PlayingCard({
   const frontStyle = useAnimatedStyle(() => ({
     opacity: progress.value < 0.55 ? 1 : 0,
     transform: [
-      { perspective: 900 },
+      {
+        perspective: 900,
+      },
       {
         rotateY: `${interpolate(progress.value, [0.35, 0.75], [0, 180], "clamp")}deg`,
       },
@@ -241,7 +250,9 @@ export function PlayingCard({
       progress.value >= 0.75
         ? []
         : [
-            { perspective: 900 },
+            {
+              perspective: 900,
+            },
             {
               rotateY: `${interpolate(progress.value, [0.35, 0.75], [180, 360], "clamp")}deg`,
             },
@@ -253,14 +264,18 @@ export function PlayingCard({
       flight.value === 0
         ? []
         : [
-            { perspective: 900 },
+            {
+              perspective: 900,
+            },
             {
               rotateY: `${interpolate(flight.value, [0, 0.32], [0, 65], "clamp")}deg`,
             },
             {
               scaleX: interpolate(flight.value, [0, 0.32], [1, 0.08], "clamp"),
             },
-            { scaleY: interpolate(flight.value, [0, 0.32], [1, 0.5], "clamp") },
+            {
+              scaleY: interpolate(flight.value, [0, 0.32], [1, 0.5], "clamp"),
+            },
           ],
   }));
 
@@ -272,7 +287,9 @@ export function PlayingCard({
           ((float.value / (Math.PI * 2) + index / 3) % 1) * renderWidth * 3 -
           renderWidth,
       },
-      { rotate: "25deg" },
+      {
+        rotate: "25deg",
+      },
     ],
   }));
 
@@ -292,7 +309,9 @@ export function PlayingCard({
           "clamp",
         ),
       },
-      { rotate: "25deg" },
+      {
+        rotate: "25deg",
+      },
     ],
   }));
 
@@ -322,13 +341,18 @@ export function PlayingCard({
               : "Selected card. After revealing, tap to add to cart"
             : `Pick card ${index + 1}`
         }
-        accessibilityState={{ selected, disabled }}
+        accessibilityState={{
+          selected,
+          disabled,
+        }}
       >
         <Animated.View
           style={[
             styles.face,
             styles.front,
-            { borderColor: selected ? "#FCD34D" : "#E9C994" },
+            {
+              borderColor: selected ? "#FCD34D" : "#E9C994",
+            },
             frontStyle,
           ]}
         >
@@ -411,8 +435,18 @@ export function PlayingCard({
 }
 
 const styles = StyleSheet.create({
-  foldLayer: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0 },
-  cashBack: { backgroundColor: "#153C2C", borderColor: "#D9B970", padding: 10 },
+  foldLayer: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  },
+  cashBack: {
+    backgroundColor: "#153C2C",
+    borderColor: "#D9B970",
+    padding: 10,
+  },
   moneyPrize: {
     width: "100%",
     alignItems: "center",
@@ -427,7 +461,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  moneyCaption: { color: "#CCE0D3", fontSize: 9, textAlign: "center" },
+  moneyCaption: {
+    color: "#CCE0D3",
+    fontSize: 9,
+    textAlign: "center",
+  },
   collect: {
     position: "absolute",
     bottom: 14,
@@ -461,8 +499,12 @@ const styles = StyleSheet.create({
     fontSize: 42,
     fontWeight: "800",
   },
-  card: { position: "absolute" },
-  touch: { flex: 1 },
+  card: {
+    position: "absolute",
+  },
+  touch: {
+    flex: 1,
+  },
   face: {
     position: "absolute",
     top: 0,
@@ -476,14 +518,18 @@ const styles = StyleSheet.create({
     backfaceVisibility: "hidden",
     overflow: "hidden",
   },
-  front: { backgroundColor: "#182433" },
+  front: {
+    backgroundColor: "#182433",
+  },
   back: {
     backgroundColor: "#FFF8E7",
     borderColor: "#E9C994",
     gap: 17,
     padding: 24,
   },
-  photoBack: { backgroundColor: "#FFFFFF" },
+  photoBack: {
+    backgroundColor: "#FFFFFF",
+  },
   reveal: {
     position: "absolute",
     bottom: 24,

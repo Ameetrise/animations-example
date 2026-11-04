@@ -66,9 +66,15 @@ function Piece({
             (t * 0.55 + t * t * 0.45) * height * seed.fall +
             Math.sin(t * Math.PI * 4 + seed.phase) * 14,
         },
-        { rotate: `${t * seed.spin}deg` },
-        { rotateX: `${t * seed.tumble}deg` },
-        { rotateY: `${Math.sin(t * Math.PI * seed.frequency) * 65}deg` },
+        {
+          rotate: `${t * seed.spin}deg`,
+        },
+        {
+          rotateX: `${t * seed.tumble}deg`,
+        },
+        {
+          rotateY: `${Math.sin(t * Math.PI * seed.frequency) * 65}deg`,
+        },
       ],
     };
   });
@@ -96,7 +102,10 @@ export function Confetti({ progress }: { progress: SharedValue<number> }) {
     (revealed, previous) => {
       if (revealed && !previous) {
         burst.value = 0;
-        burst.value = withTiming(1, { duration: 4200, easing: Easing.linear });
+        burst.value = withTiming(1, {
+          duration: 4200,
+          easing: Easing.linear,
+        });
       }
     },
   );
@@ -104,15 +113,20 @@ export function Confetti({ progress }: { progress: SharedValue<number> }) {
 
   return (
     <View pointerEvents="none" accessible={false} style={styles.layer}>
-      {Array.from({ length: 90 }, (_, index) => (
-        <Piece
-          key={index}
-          index={index}
-          burst={burst}
-          width={width}
-          height={height}
-        />
-      ))}
+      {Array.from(
+        {
+          length: 90,
+        },
+        (_, index) => (
+          <Piece
+            key={index}
+            index={index}
+            burst={burst}
+            width={width}
+            height={height}
+          />
+        ),
+      )}
     </View>
   );
 }

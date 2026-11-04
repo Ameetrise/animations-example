@@ -16,4 +16,8 @@ export const darkColors = {
 
 export type ThemeColors = typeof lightColors;
 
-export const spacing = { small: 8, medium: 16, large: 24 };
+export const spacing = {
+  small: 8,
+  medium: 16,
+  large: 24,
+};

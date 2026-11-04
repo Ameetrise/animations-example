@@ -42,11 +42,21 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
   const Demo = selectedDemo.Component;
 
   const cartStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: cartScale.value }],
+    transform: [
+      {
+        scale: cartScale.value,
+      },
+    ],
   }));
-  const fadeStyle = useAnimatedStyle(() => ({ opacity: themeOpacity.value }));
+  const fadeStyle = useAnimatedStyle(() => ({
+    opacity: themeOpacity.value,
+  }));
   const spinStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotation.value}deg` }],
+    transform: [
+      {
+        rotate: `${rotation.value}deg`,
+      },
+    ],
   }));
 
   useEffect(() => {
@@ -59,22 +69,36 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
   }, [progress, rotation, themeOpacity, cartScale]);
 
   useEffect(() => {
-    themeOpacity.value = withTiming(1, { duration: 250 }, (finished) => {
-      if (finished) changingTheme.value = false;
-    });
+    themeOpacity.value = withTiming(
+      1,
+      {
+        duration: 250,
+      },
+      (finished) => {
+        if (finished) changingTheme.value = false;
+      },
+    );
   }, [isDark, themeOpacity, changingTheme]);
 
   function toggleTheme() {
     if (changingTheme.value) return;
     changingTheme.value = true;
-    rotation.value = withTiming(rotation.value + 360, { duration: 500 });
-    themeOpacity.value = withTiming(0, { duration: 200 }, (finished) => {
-      if (finished) scheduleOnRN(onToggleTheme);
+    rotation.value = withTiming(rotation.value + 360, {
+      duration: 500,
     });
+    themeOpacity.value = withTiming(
+      0,
+      {
+        duration: 200,
+      },
+      (finished) => {
+        if (finished) scheduleOnRN(onToggleTheme);
+      },
+    );
   }
 
   const playDisabled =
-    hasPlayed || (selectedIndex === 0 && selectedCard === null);
+    selectedIndex !== 0 || hasPlayed || selectedCard === null;
 
   function playAnimation() {
     if (playDisabled) return;
@@ -86,21 +110,33 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
               duration: 420,
               easing: Easing.out(Easing.cubic),
             }),
-            withTiming(0.35, { duration: 180 }),
+            withTiming(0.35, {
+              duration: 180,
+            }),
             withTiming(0.75, {
               duration: 620,
               easing: Easing.inOut(Easing.cubic),
             }),
-            withTiming(1, { duration: 440, easing: Easing.out(Easing.quad) }),
+            withTiming(1, {
+              duration: 440,
+              easing: Easing.out(Easing.quad),
+            }),
           )
-        : withTiming(1, { duration: 700 });
+        : withTiming(1, {
+            duration: 700,
+          });
   }
 
   function addToCart() {
     setCartCount((count) => count + 1);
     cartScale.value = withSequence(
-      withTiming(1.2, { duration: 140 }),
-      withSpring(1, { damping: 12, stiffness: 220 }),
+      withTiming(1.2, {
+        duration: 140,
+      }),
+      withSpring(1, {
+        damping: 12,
+        stiffness: 220,
+      }),
     );
   }
 
@@ -125,7 +161,12 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
     <View style={styles.backdrop}>
       <Animated.View style={[styles.screen, fadeStyle]}>
         <SafeAreaView
-          style={[styles.screen, { backgroundColor: colors.background }]}
+          style={[
+            styles.screen,
+            {
+              backgroundColor: colors.background,
+            },
+          ]}
         >
           <AnimatedBackdrop isDark={isDark} progress={progress} />
           <View style={styles.header}>
@@ -208,13 +249,22 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
             </View>
           </View>
 
-          <View style={[styles.controls, { backgroundColor: colors.surface }]}>
+          <View
+            style={[
+              styles.controls,
+              {
+                backgroundColor: colors.surface,
+              },
+            ]}
+          >
             <View style={styles.row}>
               {demos.map((demo, index) => (
                 <Pressable
                   key={demo.id}
                   accessibilityRole="button"
-                  accessibilityState={{ selected: selectedIndex === index }}
+                  accessibilityState={{
+                    selected: selectedIndex === index,
+                  }}
                   onPress={() => selectDemo(index)}
                   style={[
                     styles.button,
@@ -246,7 +296,9 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
                 accessibilityRole="button"
                 onPress={playAnimation}
                 disabled={playDisabled}
-                accessibilityState={{ disabled: playDisabled }}
+                accessibilityState={{
+                  disabled: playDisabled,
+                }}
                 style={[
                   styles.button,
                   {
@@ -256,17 +308,36 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
                 ]}
               >
                 <Feather name="play" size={20} color={colors.text} />
-                <Text style={[styles.buttonText, { color: colors.text }]}>
+                <Text
+                  style={[
+                    styles.buttonText,
+                    {
+                      color: colors.text,
+                    },
+                  ]}
+                >
                   Reveal
                 </Text>
               </Pressable>
               <Pressable
                 accessibilityRole="button"
                 onPress={resetAnimation}
-                style={[styles.button, { borderColor: colors.border }]}
+                style={[
+                  styles.button,
+                  {
+                    borderColor: colors.border,
+                  },
+                ]}
               >
                 <Feather name="rotate-ccw" size={20} color={colors.text} />
-                <Text style={[styles.buttonText, { color: colors.text }]}>
+                <Text
+                  style={[
+                    styles.buttonText,
+                    {
+                      color: colors.text,
+                    },
+                  ]}
+                >
                   Reset
                 </Text>
               </Pressable>
@@ -286,7 +357,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#121212",
   },
-  screen: { flex: 1 },
+  screen: {
+    flex: 1,
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -294,7 +367,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.large,
     paddingTop: spacing.small,
   },
-  headerActions: { flexDirection: "row", gap: 8 },
+  headerActions: {
+    flexDirection: "row",
+    gap: 8,
+  },
   cartBadge: {
     position: "absolute",
     top: -6,
@@ -307,7 +383,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  cartCount: { color: "#FFFFFF", fontSize: 11, fontWeight: "700" },
+  cartCount: {
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "700",
+  },
   themeButton: {
     width: 48,
     height: 48,

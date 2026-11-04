@@ -36,9 +36,15 @@ function TransferSpark({
     return {
       opacity: interpolate(t, [0, 0.15, 0.8, 1], [0, 0.8, 0.8, 0]),
       transform: [
-        { translateX: Math.sin(t * Math.PI) * (index % 2 ? 30 : -30) },
-        { translateY: t * 100 },
-        { scale: 1 - t * 0.6 },
+        {
+          translateX: Math.sin(t * Math.PI) * (index % 2 ? 30 : -30),
+        },
+        {
+          translateY: t * 100,
+        },
+        {
+          scale: 1 - t * 0.6,
+        },
       ],
     };
   });
@@ -54,12 +60,23 @@ export function DepositAnimation({ colors }: Props) {
 
   useEffect(() => {
     progress.value = withSequence(
-      withTiming(0.35, { duration: 1100, easing: Easing.out(Easing.quad) }),
-      withTiming(0.6, { duration: 900 }),
-      withTiming(0.9, { duration: 800, easing: Easing.in(Easing.cubic) }),
+      withTiming(0.35, {
+        duration: 1100,
+        easing: Easing.out(Easing.quad),
+      }),
+      withTiming(0.6, {
+        duration: 900,
+      }),
+      withTiming(0.9, {
+        duration: 800,
+        easing: Easing.in(Easing.cubic),
+      }),
       withTiming(
         1,
-        { duration: 650, easing: Easing.out(Easing.cubic) },
+        {
+          duration: 650,
+          easing: Easing.out(Easing.cubic),
+        },
         (finished) => {
           if (finished) scheduleOnRN(setDeposited, true);
         },
@@ -77,13 +94,17 @@ export function DepositAnimation({ colors }: Props) {
   const scanStyle = useAnimatedStyle(() => ({
     opacity: progress.value < 0.35 ? 0.5 : 0,
     transform: [
-      { translateY: interpolate(progress.value, [0, 0.35], [0, 100], "clamp") },
+      {
+        translateY: interpolate(progress.value, [0, 0.35], [0, 100], "clamp"),
+      },
     ],
   }));
   const haloStyle = useAnimatedStyle(() => ({
     opacity: interpolate(progress.value, [0.88, 0.93, 1], [0, 0.5, 0], "clamp"),
     transform: [
-      { scale: interpolate(progress.value, [0.88, 1], [0.8, 1.4], "clamp") },
+      {
+        scale: interpolate(progress.value, [0.88, 1], [0.8, 1.4], "clamp"),
+      },
     ],
   }));
 
@@ -109,7 +130,9 @@ export function DepositAnimation({ colors }: Props) {
           "clamp",
         ),
       },
-      { rotate: "-12deg" },
+      {
+        rotate: "-12deg",
+      },
       {
         scale: interpolate(
           progress.value,
@@ -128,7 +151,9 @@ export function DepositAnimation({ colors }: Props) {
       "clamp",
     ),
     transform: [
-      { scale: interpolate(progress.value, [0.45, 0.58], [0.3, 1.5], "clamp") },
+      {
+        scale: interpolate(progress.value, [0.45, 0.58], [0.3, 1.5], "clamp"),
+      },
     ],
   }));
   const balanceStyle = useAnimatedStyle(() => ({
@@ -185,7 +210,9 @@ export function DepositAnimation({ colors }: Props) {
           "clamp",
         ),
       },
-      { rotate: "-12deg" },
+      {
+        rotate: "-12deg",
+      },
     ],
   }));
   const bankStyle = useAnimatedStyle(() => ({
@@ -209,24 +236,47 @@ export function DepositAnimation({ colors }: Props) {
     <View style={styles.scene}>
       <View style={styles.status}>
         <Animated.Text
-          style={[styles.statusText, { color: colors.muted }, printingStyle]}
+          style={[
+            styles.statusText,
+            {
+              color: colors.muted,
+            },
+            printingStyle,
+          ]}
         >
           Printing your check…
         </Animated.Text>
         <Animated.Text
-          style={[styles.statusText, { color: colors.muted }, stampingStyle]}
+          style={[
+            styles.statusText,
+            {
+              color: colors.muted,
+            },
+            stampingStyle,
+          ]}
         >
           Giving it the stamp of approval…
         </Animated.Text>
         <Animated.Text
-          style={[styles.statusText, { color: colors.muted }, depositingStyle]}
+          style={[
+            styles.statusText,
+            {
+              color: colors.muted,
+            },
+            depositingStyle,
+          ]}
         >
           Sending your reward to your account…
         </Animated.Text>
         {deposited && (
           <Text
             accessibilityLiveRegion="polite"
-            style={[styles.statusText, { color: colors.text }]}
+            style={[
+              styles.statusText,
+              {
+                color: colors.text,
+              },
+            ]}
           >
             Reward deposited ✓
           </Text>
@@ -235,16 +285,33 @@ export function DepositAnimation({ colors }: Props) {
       <View
         style={[
           styles.printer,
-          { backgroundColor: colors.surface, borderColor: colors.border },
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+          },
         ]}
       >
         <Feather name="printer" size={14} color={colors.muted} />
-        <Text style={[styles.printerLabel, { color: colors.muted }]}>
+        <Text
+          style={[
+            styles.printerLabel,
+            {
+              color: colors.muted,
+            },
+          ]}
+        >
           PACK REWARDS
         </Text>
         <Animated.View style={[styles.indicator, printerStyle]} />
       </View>
-      <View style={[styles.slot, { backgroundColor: colors.text }]} />
+      <View
+        style={[
+          styles.slot,
+          {
+            backgroundColor: colors.text,
+          },
+        ]}
+      />
       <View pointerEvents="none" style={styles.paperWindow}>
         <Animated.View style={[styles.check, checkStyle]}>
           <Animated.View style={[styles.scan, scanStyle]} />
@@ -273,9 +340,14 @@ export function DepositAnimation({ colors }: Props) {
           <Text style={styles.stampToolText}>PACK</Text>
         </View>
       </Animated.View>
-      {Array.from({ length: 6 }, (_, index) => (
-        <TransferSpark key={index} index={index} progress={progress} />
-      ))}
+      {Array.from(
+        {
+          length: 6,
+        },
+        (_, index) => (
+          <TransferSpark key={index} index={index} progress={progress} />
+        ),
+      )}
       <Animated.View
         pointerEvents="none"
         style={[styles.bankHalo, haloStyle]}
@@ -283,7 +355,10 @@ export function DepositAnimation({ colors }: Props) {
       <Animated.View
         style={[
           styles.bank,
-          { backgroundColor: colors.surface, borderColor: colors.border },
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+          },
           bankStyle,
         ]}
       >
@@ -293,14 +368,34 @@ export function DepositAnimation({ colors }: Props) {
           color="#31956A"
         />
         <View>
-          <Text style={[styles.accountName, { color: colors.text }]}>
+          <Text
+            style={[
+              styles.accountName,
+              {
+                color: colors.text,
+              },
+            ]}
+          >
             Your account
           </Text>
-          <Text style={[styles.bankLabel, { color: colors.muted }]}>
+          <Text
+            style={[
+              styles.bankLabel,
+              {
+                color: colors.muted,
+              },
+            ]}
+          >
             AVAILABLE BALANCE
           </Text>
           <Animated.Text
-            style={[styles.balance, { color: colors.text }, balanceStyle]}
+            style={[
+              styles.balance,
+              {
+                color: colors.text,
+              },
+              balanceStyle,
+            ]}
           >
             ${balance.toFixed(2)}
           </Animated.Text>
@@ -372,8 +467,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#76C89A",
     zIndex: 3,
   },
-  scene: { width: "100%", height: 310, alignItems: "center" },
-  status: { height: 26, width: "100%" },
+  scene: {
+    width: "100%",
+    height: 310,
+    alignItems: "center",
+  },
+  status: {
+    height: 26,
+    width: "100%",
+  },
   statusText: {
     position: "absolute",
     width: "100%",
@@ -390,14 +492,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 12,
   },
-  printerLabel: { flex: 1, fontSize: 8, letterSpacing: 1, fontWeight: "700" },
+  printerLabel: {
+    flex: 1,
+    fontSize: 8,
+    letterSpacing: 1,
+    fontWeight: "700",
+  },
   indicator: {
     width: 5,
     height: 5,
     borderRadius: 3,
     backgroundColor: "#31956A",
   },
-  slot: { width: 236, height: 7, borderRadius: 4, marginTop: -5 },
+  slot: {
+    width: 236,
+    height: 7,
+    borderRadius: 4,
+    marginTop: -5,
+  },
   scan: {
     position: "absolute",
     left: 0,
@@ -413,7 +525,10 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     backgroundColor: "#7CCBA0",
   },
-  accountName: { fontSize: 12, fontWeight: "600" },
+  accountName: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
   credit: {
     position: "absolute",
     right: 12,
@@ -455,10 +570,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  payee: { fontSize: 12, color: "#315C40" },
-  amount: { fontSize: 23, fontWeight: "800", color: "#195A39" },
-  written: { fontSize: 10, color: "#315C40" },
-  void: { fontSize: 7, color: "#58725D" },
+  payee: {
+    fontSize: 12,
+    color: "#315C40",
+  },
+  amount: {
+    fontSize: 23,
+    fontWeight: "800",
+    color: "#195A39",
+  },
+  written: {
+    fontSize: 10,
+    color: "#315C40",
+  },
+  void: {
+    fontSize: 7,
+    color: "#58725D",
+  },
   stamp: {
     position: "absolute",
     right: 18,
@@ -469,7 +597,11 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     backgroundColor: "#F2FAEEDD",
   },
-  stampText: { fontSize: 14, fontWeight: "900", color: "#258353" },
+  stampText: {
+    fontSize: 14,
+    fontWeight: "900",
+    color: "#258353",
+  },
   bank: {
     position: "absolute",
     bottom: 15,
@@ -482,6 +614,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 18,
   },
-  bankLabel: { fontSize: 9, letterSpacing: 1, fontWeight: "700" },
-  balance: { fontSize: 24, fontWeight: "700" },
+  bankLabel: {
+    fontSize: 9,
+    letterSpacing: 1,
+    fontWeight: "700",
+  },
+  balance: {
+    fontSize: 24,
+    fontWeight: "700",
+  },
 });

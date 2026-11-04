@@ -22,9 +22,21 @@ import { PlayingCard } from "./PlayingCard";
 import { ShiningStar } from "./ShiningStar";
 
 const products = [
-  { name: "$500 cash reward", icon: "dollar-sign", suit: "♠" },
-  { name: "AirPods Max", icon: "headphones", suit: "♥" },
-  { name: "AirPods Max", icon: "headphones", suit: "♦" },
+  {
+    name: "$500 cash reward",
+    icon: "dollar-sign",
+    suit: "♠",
+  },
+  {
+    name: "AirPods Max",
+    icon: "headphones",
+    suit: "♥",
+  },
+  {
+    name: "AirPods Max",
+    icon: "headphones",
+    suit: "♦",
+  },
 ] as const;
 
 export function SurpriseCardDemo({
@@ -54,7 +66,10 @@ export function SurpriseCardDemo({
   const [isShuffling, setIsShuffling] = useState(!reduceMotion);
 
   useEffect(() => {
-    const step = { duration: 700, easing: Easing.inOut(Easing.sin) };
+    const step = {
+      duration: 700,
+      easing: Easing.inOut(Easing.sin),
+    };
     shuffle.value = withSequence(
       withTiming(0.2, step),
       withTiming(0.4, step),
@@ -70,7 +85,10 @@ export function SurpriseCardDemo({
   useEffect(() => {
     if (!reduceMotion)
       float.value = withRepeat(
-        withTiming(Math.PI * 2, { duration: 4800, easing: Easing.linear }),
+        withTiming(Math.PI * 2, {
+          duration: 4800,
+          easing: Easing.linear,
+        }),
         -1,
         false,
       );
@@ -95,7 +113,9 @@ export function SurpriseCardDemo({
   const revealedStyle = useAnimatedStyle(() => ({
     opacity: interpolate(progress.value, [0.6, 0.8], [0, 1], "clamp"),
     transform: [
-      { translateY: interpolate(progress.value, [0.6, 0.8], [12, 0], "clamp") },
+      {
+        translateY: interpolate(progress.value, [0.6, 0.8], [12, 0], "clamp"),
+      },
     ],
   }));
   const hint = isShuffling
@@ -118,8 +138,22 @@ export function SurpriseCardDemo({
         <Animated.Text style={[styles.brand, brandStyle]}>
           Pack.com
         </Animated.Text>
-        <View style={[styles.badge, { borderColor: colors.border }]}>
-          <Text style={[styles.eyebrow, { color: colors.muted }]}>
+        <View
+          style={[
+            styles.badge,
+            {
+              borderColor: colors.border,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.eyebrow,
+              {
+                color: colors.muted,
+              },
+            ]}
+          >
             SURPRISE PICKS
           </Text>
         </View>
@@ -131,20 +165,33 @@ export function SurpriseCardDemo({
           .reduceMotion(ReduceMotion.System)}
         style={[
           styles.title,
-          { color: colors.text },
+          {
+            color: colors.text,
+          },
           compact && styles.compactTitle,
         ]}
       >
         One pick.{compact ? " " : "\n"}
         <Text style={styles.accent}>A little magic.</Text>
       </Animated.Text>
-      <View style={[styles.table, { height: tableHeight }]}>
+      <View
+        style={[
+          styles.table,
+          {
+            height: tableHeight,
+          },
+        ]}
+      >
         {claimingMoney ? (
           <View
             style={{
               width: "100%",
               height: 310,
-              transform: [{ scale: Math.min(1, tableHeight / 310) }],
+              transform: [
+                {
+                  scale: Math.min(1, tableHeight / 310),
+                },
+              ],
             }}
           >
             <DepositAnimation colors={colors} />
@@ -168,14 +215,19 @@ export function SurpriseCardDemo({
                 onPress={() => onSelectCard(index)}
               />
             ))}
-            {Array.from({ length: 8 }, (_, index) => (
-              <ShiningStar
-                key={index}
-                index={index}
-                progress={progress}
-                float={float}
-              />
-            ))}
+            {Array.from(
+              {
+                length: 8,
+              },
+              (_, index) => (
+                <ShiningStar
+                  key={index}
+                  index={index}
+                  progress={progress}
+                  float={float}
+                />
+              ),
+            )}
           </>
         )}
       </View>
@@ -187,11 +239,23 @@ export function SurpriseCardDemo({
               ReduceMotion.System,
             )}
             exiting={FadeOutUp.duration(150).reduceMotion(ReduceMotion.System)}
-            style={[styles.hint, { color: colors.text }]}
+            style={[
+              styles.hint,
+              {
+                color: colors.text,
+              },
+            ]}
           >
             {hint}
           </Animated.Text>
-          <Text style={[styles.sample, { color: colors.muted }]}>
+          <Text
+            style={[
+              styles.sample,
+              {
+                color: colors.muted,
+              },
+            ]}
+          >
             {isShuffling
               ? "Your surprise is getting ready"
               : selectedCard === null
@@ -200,7 +264,14 @@ export function SurpriseCardDemo({
           </Text>
         </Animated.View>
         <Animated.View style={[styles.copy, revealedStyle]}>
-          <Text style={[styles.productName, { color: colors.text }]}>
+          <Text
+            style={[
+              styles.productName,
+              {
+                color: colors.text,
+              },
+            ]}
+          >
             {claimingMoney
               ? "A little payday magic."
               : selectedCard === null
@@ -212,7 +283,12 @@ export function SurpriseCardDemo({
             entering={FadeInDown.duration(250).reduceMotion(
               ReduceMotion.System,
             )}
-            style={[styles.sample, { color: colors.muted }]}
+            style={[
+              styles.sample,
+              {
+                color: colors.muted,
+              },
+            ]}
           >
             {claimingMoney ? "Printed. Approved. Collected." : message}
           </Animated.Text>
@@ -223,17 +299,34 @@ export function SurpriseCardDemo({
 }
 
 const styles = StyleSheet.create({
-  container: { alignItems: "center", width: "100%" },
-  brandRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  brand: { fontSize: 23, fontWeight: "800", letterSpacing: -0.8 },
+  container: {
+    alignItems: "center",
+    width: "100%",
+  },
+  brandRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  brand: {
+    fontSize: 23,
+    fontWeight: "800",
+    letterSpacing: -0.8,
+  },
   badge: {
     borderWidth: 1,
     borderRadius: 20,
     paddingHorizontal: 9,
     paddingVertical: 5,
   },
-  eyebrow: { fontSize: 9, fontWeight: "700", letterSpacing: 1.2 },
-  accent: { color: "#C77A18" },
+  eyebrow: {
+    fontSize: 9,
+    fontWeight: "700",
+    letterSpacing: 1.2,
+  },
+  accent: {
+    color: "#C77A18",
+  },
   title: {
     fontSize: 28,
     fontWeight: "700",
@@ -247,14 +340,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  compactTitle: { fontSize: 23, lineHeight: 29, marginTop: 10 },
-  footer: { height: 76, width: "100%" },
-  copy: { position: "absolute", width: "100%", alignItems: "center", gap: 5 },
-  productName: { fontSize: 21, fontWeight: "700" },
+  compactTitle: {
+    fontSize: 23,
+    lineHeight: 29,
+    marginTop: 10,
+  },
+  footer: {
+    height: 76,
+    width: "100%",
+  },
+  copy: {
+    position: "absolute",
+    width: "100%",
+    alignItems: "center",
+    gap: 5,
+  },
+  productName: {
+    fontSize: 21,
+    fontWeight: "700",
+  },
   hint: {
     textAlign: "center",
     fontSize: 15,
     lineHeight: 24,
   },
-  sample: { fontSize: 12, textAlign: "center" },
+  sample: {
+    fontSize: 12,
+    textAlign: "center",
+  },
 });

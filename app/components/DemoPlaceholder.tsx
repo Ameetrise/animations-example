@@ -5,9 +5,31 @@ type Props = { label: string; colors: ThemeColors };
 
 export function DemoPlaceholder({ label, colors }: Props) {
   return (
-    <View style={[styles.stage, { borderColor: colors.border }]}>
-      <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
-      <Text style={{ color: colors.muted }}>Animation coming soon</Text>
+    <View
+      style={[
+        styles.stage,
+        {
+          borderColor: colors.border,
+        },
+      ]}
+    >
+      <Text
+        style={[
+          styles.label,
+          {
+            color: colors.text,
+          },
+        ]}
+      >
+        {label}
+      </Text>
+      <Text
+        style={{
+          color: colors.muted,
+        }}
+      >
+        Animation coming soon
+      </Text>
     </View>
   );
 }

@@ -20,7 +20,10 @@ export function AnimatedBackdrop({ isDark, progress }: Props) {
   useEffect(() => {
     if (!reduceMotion) {
       drift.value = withRepeat(
-        withTiming(Math.PI * 2, { duration: 22000, easing: Easing.linear }),
+        withTiming(Math.PI * 2, {
+          duration: 22000,
+          easing: Easing.linear,
+        }),
         -1,
         false,
       );
@@ -30,22 +33,38 @@ export function AnimatedBackdrop({ isDark, progress }: Props) {
 
   const warmStyle = useAnimatedStyle(() => ({
     transform: [
-      { translateX: Math.sin(drift.value) * 24 },
-      { translateY: Math.cos(drift.value) * 18 },
+      {
+        translateX: Math.sin(drift.value) * 24,
+      },
+      {
+        translateY: Math.cos(drift.value) * 18,
+      },
     ],
   }));
   const coolStyle = useAnimatedStyle(() => ({
     transform: [
-      { translateX: -Math.sin(drift.value) * 22 },
-      { translateY: -Math.cos(drift.value) * 26 },
+      {
+        translateX: -Math.sin(drift.value) * 22,
+      },
+      {
+        translateY: -Math.cos(drift.value) * 26,
+      },
     ],
   }));
   const orbitStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${Math.sin(drift.value) * 8 - 24}deg` }],
+    transform: [
+      {
+        rotate: `${Math.sin(drift.value) * 8 - 24}deg`,
+      },
+    ],
   }));
   const glowStyle = useAnimatedStyle(() => ({
     opacity: 0.05 + Math.sin(progress.value * Math.PI) * 0.1,
-    transform: [{ scale: 0.9 + progress.value * 0.25 }],
+    transform: [
+      {
+        scale: 0.9 + progress.value * 0.25,
+      },
+    ],
   }));
 
   return (
@@ -54,14 +73,18 @@ export function AnimatedBackdrop({ isDark, progress }: Props) {
         style={[
           styles.orb,
           styles.warm,
-          { backgroundColor: isDark ? "#B8742820" : "#F4C88335" },
+          {
+            backgroundColor: isDark ? "#B8742820" : "#F4C88335",
+          },
           warmStyle,
         ]}
       >
         <View
           style={[
             styles.innerOrb,
-            { backgroundColor: isDark ? "#B8742818" : "#F4C88325" },
+            {
+              backgroundColor: isDark ? "#B8742818" : "#F4C88325",
+            },
           ]}
         />
       </Animated.View>
@@ -69,31 +92,40 @@ export function AnimatedBackdrop({ isDark, progress }: Props) {
         style={[
           styles.orb,
           styles.cool,
-          { backgroundColor: isDark ? "#7774C520" : "#B9B4DF30" },
+          {
+            backgroundColor: isDark ? "#7774C520" : "#B9B4DF30",
+          },
           coolStyle,
         ]}
       />
       <Animated.View
         style={[
           styles.orbit,
-          { borderColor: isDark ? "#F6DAA314" : "#B7833520" },
+          {
+            borderColor: isDark ? "#F6DAA314" : "#B7833520",
+          },
           orbitStyle,
         ]}
       />
       <Animated.View style={[styles.glow, glowStyle]} />
-      {Array.from({ length: 12 }, (_, index) => (
-        <View
-          key={index}
-          style={[
-            styles.dot,
-            {
-              left: `${8 + ((index * 29) % 84)}%`,
-              top: `${12 + ((index * 17) % 72)}%`,
-              backgroundColor: isDark ? "#F7DCA345" : "#AD7C3540",
-            },
-          ]}
-        />
-      ))}
+      {Array.from(
+        {
+          length: 12,
+        },
+        (_, index) => (
+          <View
+            key={index}
+            style={[
+              styles.dot,
+              {
+                left: `${8 + ((index * 29) % 84)}%`,
+                top: `${12 + ((index * 17) % 72)}%`,
+                backgroundColor: isDark ? "#F7DCA345" : "#AD7C3540",
+              },
+            ]}
+          />
+        ),
+      )}
     </View>
   );
 }
@@ -115,9 +147,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  warm: { top: "12%", left: -170 },
-  cool: { bottom: "12%", right: -210 },
-  innerOrb: { width: 270, height: 270, borderRadius: 135 },
+  warm: {
+    top: "12%",
+    left: -170,
+  },
+  cool: {
+    bottom: "12%",
+    right: -210,
+  },
+  innerOrb: {
+    width: 270,
+    height: 270,
+    borderRadius: 135,
+  },
   orbit: {
     position: "absolute",
     width: 480,
@@ -136,5 +178,10 @@ const styles = StyleSheet.create({
     top: "30%",
     backgroundColor: "#E8AD32",
   },
-  dot: { position: "absolute", width: 3, height: 3, borderRadius: 2 },
+  dot: {
+    position: "absolute",
+    width: 3,
+    height: 3,
+    borderRadius: 2,
+  },
 });

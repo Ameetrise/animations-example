@@ -90,13 +90,30 @@ export function FpsCounter({ colors }: { colors: ThemeColors }) {
     <View
       style={[
         styles.badge,
-        { backgroundColor: colors.surface, borderColor: colors.border },
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+        },
       ]}
     >
-      <Text style={[styles.label, { color: colors.text }]}>
+      <Text
+        style={[
+          styles.label,
+          {
+            color: colors.text,
+          },
+        ]}
+      >
         UI {fps?.toFixed(1) ?? "—"} FPS
       </Text>
-      <Text style={[styles.label, { color: colors.muted }]}>
+      <Text
+        style={[
+          styles.label,
+          {
+            color: colors.muted,
+          },
+        ]}
+      >
         JS {jsFps?.toFixed(1) ?? "—"} FPS
       </Text>
     </View>

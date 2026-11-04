@@ -1,16 +1,90 @@
-import Animated, { useAnimatedStyle } from "react-native-reanimated";
+import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import type { DemoProps } from "../types";
-import { DemoPlaceholder } from "../../components/DemoPlaceholder";
+import { MysteryBox } from "./MysteryBox";
 
-export function MysteryBoxDemo({ colors, progress }: DemoProps) {
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: 0.4 + progress.value * 0.6,
-    transform: [{ scale: 0.8 + progress.value * 0.2 }],
-  }));
+export function MysteryBoxDemo({ colors, availableHeight }: DemoProps) {
+  const { width } = useWindowDimensions();
+  const scale = Math.min(
+    1,
+    (width - 64) / 280,
+    Math.max(0.5, (availableHeight - 120) / 260),
+  );
 
   return (
-    <Animated.View style={animatedStyle}>
-      <DemoPlaceholder colors={colors} label="Mystery box" />
-    </Animated.View>
+    <View style={styles.container}>
+      <Text
+        style={[
+          styles.eyebrow,
+          {
+            color: colors.muted,
+          },
+        ]}
+      >
+        PACK.COM · MYSTERY BOX
+      </Text>
+      <Text
+        style={[
+          styles.title,
+          {
+            color: colors.text,
+          },
+        ]}
+      >
+        Good things come boxed.
+      </Text>
+      <View
+        style={{
+          width: 280 * scale,
+          height: 260 * scale,
+          marginVertical: 16,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <View
+          style={{
+            transform: [
+              {
+                scale,
+              },
+            ],
+          }}
+        >
+          <MysteryBox />
+        </View>
+      </View>
+      <Text
+        style={[
+          styles.caption,
+          {
+            color: colors.muted,
+          },
+        ]}
+      >
+        A little mystery. A lot to discover.
+      </Text>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    alignItems: "center",
+  },
+  eyebrow: {
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1.7,
+  },
+  title: {
+    fontSize: 25,
+    fontWeight: "700",
+    marginTop: 10,
+    textAlign: "center",
+  },
+  caption: {
+    fontSize: 14,
+    textAlign: "center",
+  },
+});

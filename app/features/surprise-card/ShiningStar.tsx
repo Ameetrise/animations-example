@@ -21,11 +21,16 @@ type Props = {
 
 export function ShiningStar({ index, progress, float }: Props) {
   const [path] = useState(() =>
-    Array.from({ length: 4 }, () => ({
-      x: Math.random() * 260 - 130,
-      y: Math.random() * 190 - 95,
-      duration: 1800 + Math.random() * 2000,
-    })),
+    Array.from(
+      {
+        length: 4,
+      },
+      () => ({
+        x: Math.random() * 260 - 130,
+        y: Math.random() * 190 - 95,
+        duration: 1800 + Math.random() * 2000,
+      }),
+    ),
   );
   const x = useSharedValue(path[0].x);
   const y = useSharedValue(path[0].y);
@@ -75,9 +80,15 @@ export function ShiningStar({ index, progress, float }: Props) {
             "clamp",
           ),
       transform: [
-        { translateX: idle ? x.value : Math.cos(angle) * radius },
-        { translateY: idle ? y.value : Math.sin(angle) * radius * 0.8 },
-        { rotate: `${float.value * 57 + index * 20 + burst * 90}deg` },
+        {
+          translateX: idle ? x.value : Math.cos(angle) * radius,
+        },
+        {
+          translateY: idle ? y.value : Math.sin(angle) * radius * 0.8,
+        },
+        {
+          rotate: `${float.value * 57 + index * 20 + burst * 90}deg`,
+        },
         {
           scale: idle ? 0.35 + twinkle * 0.65 : 0.4 + Math.sin(burst * Math.PI),
         },
@@ -97,5 +108,10 @@ export function ShiningStar({ index, progress, float }: Props) {
 }
 
 const styles = StyleSheet.create({
-  star: { position: "absolute", color: "#E8AD32", fontSize: 26, zIndex: 3 },
+  star: {
+    position: "absolute",
+    color: "#E8AD32",
+    fontSize: 26,
+    zIndex: 3,
+  },
 });

@@ -23,7 +23,9 @@ export function PaperPlane({ flight, flightX, flightY, size }: Props) {
   }));
   const upperStyle = useAnimatedStyle(() => ({
     transform: [
-      { perspective: 700 },
+      {
+        perspective: 700,
+      },
       {
         rotateX: `${interpolate(flight.value, [0.22, 0.4], [70, 0], "clamp")}deg`,
       },
@@ -31,7 +33,9 @@ export function PaperPlane({ flight, flightX, flightY, size }: Props) {
   }));
   const lowerStyle = useAnimatedStyle(() => ({
     transform: [
-      { perspective: 700 },
+      {
+        perspective: 700,
+      },
       {
         rotateX: `${interpolate(flight.value, [0.22, 0.4], [-70, 0], "clamp")}deg`,
       },
@@ -40,7 +44,15 @@ export function PaperPlane({ flight, flightX, flightY, size }: Props) {
 
   return (
     <View pointerEvents="none" style={styles.layer}>
-      <Animated.View style={[{ width: size, height: size * 0.68 }, planeStyle]}>
+      <Animated.View
+        style={[
+          {
+            width: size,
+            height: size * 0.68,
+          },
+          planeStyle,
+        ]}
+      >
         <Animated.View
           style={[
             styles.wing,
@@ -65,7 +77,15 @@ export function PaperPlane({ flight, flightX, flightY, size }: Props) {
             lowerStyle,
           ]}
         />
-        <View style={[styles.crease, { top: size * 0.34, width: size }]} />
+        <View
+          style={[
+            styles.crease,
+            {
+              top: size * 0.34,
+              width: size,
+            },
+          ]}
+        />
       </Animated.View>
     </View>
   );
@@ -88,5 +108,9 @@ const styles = StyleSheet.create({
     borderTopColor: "transparent",
     borderBottomColor: "transparent",
   },
-  crease: { position: "absolute", height: 1, backgroundColor: "#B28C48" },
+  crease: {
+    position: "absolute",
+    height: 1,
+    backgroundColor: "#B28C48",
+  },
 });
