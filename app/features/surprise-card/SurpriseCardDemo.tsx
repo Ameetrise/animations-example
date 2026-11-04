@@ -1,31 +1,27 @@
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import Feather from "@expo/vector-icons/Feather";
-import { Animated, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import type { DemoProps } from "../types";
 
 export function SurpriseCardDemo({ colors, progress }: DemoProps) {
+  const frontStyle = useAnimatedStyle(() => ({
+    opacity: progress.value < 0.5 ? 1 : 0,
+    transform: [
+      { perspective: 1000 },
+      { rotateY: `${progress.value * 180}deg` },
+    ],
+  }));
+  const backStyle = useAnimatedStyle(() => ({
+    opacity: progress.value >= 0.5 ? 1 : 0,
+    transform: [
+      { perspective: 1000 },
+      { rotateY: `${180 + progress.value * 180}deg` },
+    ],
+  }));
+
   return (
     <View style={styles.card}>
-      <Animated.View
-        style={[
-          styles.face,
-          styles.front,
-          {
-            opacity: progress.interpolate({
-              inputRange: [0, 0.49, 0.5, 1],
-              outputRange: [1, 1, 0, 0],
-            }),
-            transform: [
-              { perspective: 1000 },
-              {
-                rotateY: progress.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ["0deg", "180deg"],
-                }),
-              },
-            ],
-          },
-        ]}
-      >
+      <Animated.View style={[styles.face, styles.front, frontStyle]}>
         <Text style={styles.brand}>Pack.com</Text>
         <View style={styles.gift}>
           <Feather name="gift" size={64} color="#FFFFFF" />
@@ -37,23 +33,8 @@ export function SurpriseCardDemo({ colors, progress }: DemoProps) {
       <Animated.View
         style={[
           styles.face,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
-            opacity: progress.interpolate({
-              inputRange: [0, 0.49, 0.5, 1],
-              outputRange: [0, 0, 1, 1],
-            }),
-            transform: [
-              { perspective: 1000 },
-              {
-                rotateY: progress.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ["180deg", "360deg"],
-                }),
-              },
-            ],
-          },
+          { backgroundColor: colors.surface, borderColor: colors.border },
+          backStyle,
         ]}
       >
         <Text style={[styles.brand, { color: colors.text }]}>Pack.com</Text>

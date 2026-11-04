@@ -7,6 +7,7 @@ import type { ThemeColors } from "../theme/tokens";
 
 export function FpsCounter({ colors }: { colors: ThemeColors }) {
   const [fps, setFps] = useState<number | null>(null);
+  const [jsFps, setJsFps] = useState<number | null>(null);
   const frames = useSharedValue(0);
   const elapsed = useSharedValue(0);
 
@@ -25,7 +26,10 @@ export function FpsCounter({ colors }: { colors: ThemeColors }) {
       elapsed.value += delta;
 
       if (elapsed.value >= 500) {
-        scheduleOnRN(setFps, Math.round((frames.value * 1000) / elapsed.value));
+        scheduleOnRN(
+          setFps,
+          Math.round((frames.value * 10000) / elapsed.value) / 10,
+        );
         frames.value = 0;
         elapsed.value = 0;
       }
@@ -34,6 +38,41 @@ export function FpsCounter({ colors }: { colors: ThemeColors }) {
   );
 
   const callback = useFrameCallback(measureFrame);
+
+  useEffect(() => {
+    let request = 0;
+    let frameCount = 0;
+    let startedAt = performance.now();
+
+    function measureJS() {
+      frameCount += 1;
+      const elapsedMs = performance.now() - startedAt;
+      if (elapsedMs >= 500) {
+        setJsFps(Math.round((frameCount * 10000) / elapsedMs) / 10);
+        frameCount = 0;
+        startedAt = performance.now();
+      }
+      request = requestAnimationFrame(measureJS);
+    }
+
+    function setActive(active: boolean) {
+      cancelAnimationFrame(request);
+      frameCount = 0;
+      startedAt = performance.now();
+      setJsFps(null);
+      if (active) request = requestAnimationFrame(measureJS);
+    }
+
+    setActive(AppState.currentState === "active");
+    const subscription = AppState.addEventListener("change", (state) => {
+      setActive(state === "active");
+    });
+
+    return () => {
+      cancelAnimationFrame(request);
+      subscription.remove();
+    };
+  }, []);
 
   useEffect(() => {
     callback.setActive(AppState.currentState === "active");
@@ -55,7 +94,10 @@ export function FpsCounter({ colors }: { colors: ThemeColors }) {
       ]}
     >
       <Text style={[styles.label, { color: colors.text }]}>
-        UI FPS {fps ?? "—"}
+        UI {fps?.toFixed(1) ?? "—"} FPS
+      </Text>
+      <Text style={[styles.label, { color: colors.muted }]}>
+        JS {jsFps?.toFixed(1) ?? "—"} FPS
       </Text>
     </View>
   );

@@ -1,7 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import Animated, {
+  cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
+import { useEffect, useState } from "react";
 import Feather from "@expo/vector-icons/Feather";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { demos } from "../features/demos";
 import { FpsCounter } from "../components/FpsCounter";
 import { spacing, type ThemeColors } from "../theme/tokens";
@@ -14,73 +21,58 @@ type Props = {
 
 export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const progress = useRef(new Animated.Value(0)).current;
-  const rotation = useRef(new Animated.Value(0)).current;
-  const themeOpacity = useRef(new Animated.Value(1)).current;
-  const changingTheme = useRef(false);
-  const turns = useRef(0);
+  const progress = useSharedValue(0);
+  const rotation = useSharedValue(0);
+  const themeOpacity = useSharedValue(1);
+  const changingTheme = useSharedValue(false);
   const selectedDemo = demos[selectedIndex];
   const Demo = selectedDemo.Component;
 
+  const fadeStyle = useAnimatedStyle(() => ({ opacity: themeOpacity.value }));
+  const spinStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }],
+  }));
+
   useEffect(() => {
     return () => {
-      progress.stopAnimation();
-      rotation.stopAnimation();
-      themeOpacity.stopAnimation();
+      cancelAnimation(progress);
+      cancelAnimation(rotation);
+      cancelAnimation(themeOpacity);
     };
   }, [progress, rotation, themeOpacity]);
 
   useEffect(() => {
-    Animated.timing(themeOpacity, {
-      toValue: 1,
-      duration: 250,
-      useNativeDriver: true,
-    }).start(({ finished }) => {
-      if (finished) changingTheme.current = false;
+    themeOpacity.value = withTiming(1, { duration: 250 }, (finished) => {
+      if (finished) changingTheme.value = false;
     });
-  }, [isDark, themeOpacity]);
+  }, [isDark, themeOpacity, changingTheme]);
 
   function toggleTheme() {
-    if (changingTheme.current) return;
-    changingTheme.current = true;
-    turns.current += 1;
-    Animated.timing(rotation, {
-      toValue: turns.current,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-    Animated.timing(themeOpacity, {
-      toValue: 0,
-      duration: 200,
-      useNativeDriver: true,
-    }).start(({ finished }) => {
-      if (finished) onToggleTheme();
+    if (changingTheme.value) return;
+    changingTheme.value = true;
+    rotation.value = withTiming(rotation.value + 360, { duration: 500 });
+    themeOpacity.value = withTiming(0, { duration: 200 }, (finished) => {
+      if (finished) scheduleOnRN(onToggleTheme);
     });
   }
 
   function playAnimation() {
-    progress.stopAnimation();
-    Animated.timing(progress, {
-      toValue: 1,
-      duration: 700,
-      useNativeDriver: true,
-    }).start();
+    progress.value = withTiming(1, { duration: 700 });
   }
 
   function resetAnimation() {
-    progress.stopAnimation();
-    progress.setValue(0);
+    cancelAnimation(progress);
+    progress.value = 0;
   }
 
   function selectDemo(index: number) {
-    progress.stopAnimation();
-    progress.setValue(0);
+    resetAnimation();
     setSelectedIndex(index);
   }
 
   return (
     <View style={styles.backdrop}>
-      <Animated.View style={[styles.screen, { opacity: themeOpacity }]}>
+      <Animated.View style={[styles.screen, fadeStyle]}>
         <SafeAreaView
           style={[styles.screen, { backgroundColor: colors.background }]}
         >
@@ -97,18 +89,7 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
                 { backgroundColor: colors.surface, borderColor: colors.border },
               ]}
             >
-              <Animated.View
-                style={{
-                  transform: [
-                    {
-                      rotate: rotation.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ["0deg", "360deg"],
-                      }),
-                    },
-                  ],
-                }}
-              >
+              <Animated.View style={spinStyle}>
                 <Feather
                   name={isDark ? "sun" : "moon"}
                   size={24}
