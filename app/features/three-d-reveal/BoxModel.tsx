@@ -1,9 +1,19 @@
 import { useEffect, useMemo } from "react";
-import { AnimationMixer, Box3, LoopOnce, Vector3 } from "three";
+import {
+  AnimationMixer,
+  Box3,
+  LoopOnce,
+  PerspectiveCamera,
+  Sphere,
+  Vector3,
+} from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { Asset } from "expo-asset";
 import { useReducedMotion } from "react-native-reanimated";
-import { useFrame, useLoader } from "./renderer";
+import { useFrame, useLoader, useThree } from "./renderer";
+
+import { WinningPrize } from "./WinningPrize";
+import { RevealEffects } from "./RevealEffects";
 
 const modelUri = Asset.fromModule(
   require("../../../assets/pack-com-reveal.glb"),
@@ -18,17 +28,28 @@ type Props = {
 
 export function BoxModel({ playing, onReady, onComplete, onReveal }: Props) {
   const gltf = useLoader(GLTFLoader, modelUri);
+  const { camera, size: viewport } = useThree();
   const reduceMotion = useReducedMotion();
   const model = useMemo(() => {
     const scene = gltf.scene.clone(true);
-    const bounds = new Box3().setFromObject(scene);
-    const center = bounds.getCenter(new Vector3());
-    const size = bounds.getSize(new Vector3());
-    const scale = 2.4 / Math.max(size.x, size.y, size.z);
     const mixer = new AnimationMixer(scene);
     const action = mixer.clipAction(gltf.animations[0]);
     action.setLoop(LoopOnce, 1);
     action.clampWhenFinished = true;
+    action.play();
+    const bounds = new Box3();
+    for (let frame = 0; frame <= 120; frame += 1) {
+      mixer.setTime((frame / 120) * action.getClip().duration);
+      bounds.union(new Box3().setFromObject(scene));
+    }
+    bounds.union(
+      new Box3(new Vector3(-1.2, 0.5, -1.2), new Vector3(1.2, 5.2, 1.2)),
+    );
+    action.reset().play();
+    mixer.setTime(0);
+    const sphere = bounds.getBoundingSphere(new Sphere());
+    const scale = 2.4 / sphere.radius;
+    const center = sphere.center;
     return {
       scene,
       mixer,
@@ -37,6 +58,19 @@ export function BoxModel({ playing, onReady, onComplete, onReveal }: Props) {
       position: center.multiplyScalar(-scale),
     };
   }, [gltf]);
+
+  useEffect(() => {
+    if (!(camera instanceof PerspectiveCamera)) return;
+    const verticalAngle = (camera.fov * Math.PI) / 360;
+    const horizontalAngle = Math.atan(
+      (Math.tan(verticalAngle) * viewport.width) / viewport.height,
+    );
+    const distance =
+      (2.4 * 1.2) / Math.sin(Math.min(verticalAngle, horizontalAngle));
+    camera.position.set(4, 3.2, 5).normalize().multiplyScalar(distance);
+    camera.lookAt(0, 0, 0);
+    camera.updateProjectionMatrix();
+  }, [camera, viewport.width, viewport.height]);
 
   useEffect(() => {
     onReady();
@@ -61,13 +95,26 @@ export function BoxModel({ playing, onReady, onComplete, onReveal }: Props) {
   });
 
   return (
-    <group
-      scale={model.scale}
-      position={model.position}
-      onClick={onReveal}
-      dispose={null}
-    >
-      <primitive object={model.scene} />
+    <group>
+      <RevealEffects
+        mixer={model.mixer}
+        duration={model.action.getClip().duration}
+        playing={playing}
+        reduceMotion={reduceMotion}
+      />
+      <group
+        scale={model.scale}
+        position={model.position}
+        onClick={onReveal}
+        dispose={null}
+      >
+        <primitive object={model.scene} />
+        <WinningPrize
+          mixer={model.mixer}
+          duration={model.action.getClip().duration}
+          reduceMotion={reduceMotion}
+        />
+      </group>
     </group>
   );
 }

@@ -104,6 +104,7 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
   function playAnimation() {
     if (playDisabled) return;
     setHasPlayed(true);
+    if (selectedIndex === 2) return;
     progress.value =
       selectedIndex === 0
         ? withSequence(
@@ -361,11 +362,13 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
             </View>
           </View>
         </SafeAreaView>
-        {(selectedIndex === 1 || selectedCard === 0) && (
+        {(selectedIndex !== 0 || selectedCard === 0) && (
           <Confetti
             key={`${selectedIndex}-${round}`}
             progress={progress}
-            triggerAt={selectedIndex === 1 ? 0.85 : 0.55}
+            triggerAt={
+              selectedIndex === 2 ? 0.6 : selectedIndex === 1 ? 0.85 : 0.55
+            }
           />
         )}
       </Animated.View>

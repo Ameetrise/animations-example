@@ -1,11 +1,13 @@
 import {
   Component,
+  useEffect,
   Suspense,
   useCallback,
   useState,
   type ReactNode,
 } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { cancelAnimation, Easing, withTiming } from "react-native-reanimated";
 import type { DemoProps } from "../types";
 import { Canvas } from "./renderer";
 import { BoxModel } from "./BoxModel";
@@ -35,11 +37,22 @@ export function ThreeDRevealDemo({
   availableHeight,
   hasPlayed,
   onReveal,
+  progress,
 }: DemoProps) {
   const [ready, setReady] = useState(false);
   const [complete, setComplete] = useState(false);
   const onReady = useCallback(() => setReady(true), []);
-  const onComplete = useCallback(() => setComplete(true), []);
+  const onComplete = useCallback(() => {
+    setComplete(true);
+    progress.set(
+      withTiming(1, {
+        duration: 2200,
+        easing: Easing.out(Easing.cubic),
+      }),
+    );
+  }, [progress]);
+
+  useEffect(() => () => cancelAnimation(progress), [progress]);
 
   return (
     <View style={styles.container}>
@@ -61,7 +74,7 @@ export function ThreeDRevealDemo({
           },
         ]}
       >
-        A new dimension of surprise.
+        {complete ? "You won AirPods Max!" : "A new dimension of surprise."}
       </Text>
       <View
         style={[
@@ -130,7 +143,7 @@ export function ThreeDRevealDemo({
         {!ready
           ? "Loading your box…"
           : complete
-            ? "Made to surprise. Reset to watch again."
+            ? "Your surprise has arrived. Celebrate!"
             : hasPlayed
               ? "Watch the flaps unfold…"
               : "Tap the box or press Reveal."}

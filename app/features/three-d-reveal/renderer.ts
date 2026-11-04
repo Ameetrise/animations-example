@@ -1,1 +1,6 @@
-export { Canvas, useFrame, useLoader } from "@react-three/fiber/native";
+export {
+  Canvas,
+  useFrame,
+  useLoader,
+  useThree,
+} from "@react-three/fiber/native";
