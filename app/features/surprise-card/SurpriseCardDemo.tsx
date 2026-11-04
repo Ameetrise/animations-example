@@ -1,3 +1,4 @@
+import { palette } from "../../theme/colors";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import Animated, {
@@ -99,7 +100,7 @@ export function SurpriseCardDemo({
     color: interpolateColor(
       (Math.sin(float.value) + 1) / 2,
       [0, 1],
-      [colors.text, "#C77A18"],
+      [colors.text, palette.surpriseCardDemoColor],
     ),
   }));
   const hintStyle = useAnimatedStyle(() => ({
@@ -325,7 +326,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
   },
   accent: {
-    color: "#C77A18",
+    color: palette.surpriseCardDemoColor,
   },
   title: {
     fontSize: 28,

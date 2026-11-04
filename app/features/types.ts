@@ -8,6 +8,8 @@ export type DemoProps = {
   availableHeight: number;
   cartRef: RefObject<ComponentRef<typeof View> | null>;
   onAddedToCart: () => void;
+  onReveal: () => void;
+  hasPlayed: boolean;
   selectedCard: number | null;
   onSelectCard: (index: number) => void;
   progress: SharedValue<number>;

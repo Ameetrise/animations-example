@@ -1,56 +1,269 @@
+import { palette } from "../../theme/colors";
 import Feather from "@expo/vector-icons/Feather";
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect } from "react";
+import Animated, {
+  cancelAnimation,
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+  type SharedValue,
+} from "react-native-reanimated";
+import type { DemoProps } from "../types";
+import { BoxPrize } from "./BoxPrize";
+import { ShootingStar } from "./ShootingStar";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
 
-export function MysteryBox() {
+type Props = Pick<DemoProps, "cartRef" | "onAddedToCart"> & {
+  progress: SharedValue<number>;
+  onOpen: () => void;
+  opened: boolean;
+  scale: number;
+};
+
+export function MysteryBox({
+  progress,
+  onOpen,
+  opened,
+  scale,
+  cartRef,
+  onAddedToCart,
+}: Props) {
+  const { width } = useWindowDimensions();
+  const throwDistance = (width + 300) / scale;
+  const idle = useSharedValue(0);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (!opened && !reduceMotion) {
+      idle.set(
+        withRepeat(
+          withTiming(Math.PI * 2, {
+            duration: 2600,
+            easing: Easing.linear,
+          }),
+          -1,
+        ),
+      );
+    } else {
+      idle.set(
+        withTiming(0, {
+          duration: 200,
+        }),
+      );
+    }
+    return () => cancelAnimation(idle);
+  }, [idle, opened, reduceMotion]);
+
+  const boxStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateY: Math.sin(idle.value) * 5,
+      },
+      {
+        rotate: `${Math.sin(idle.value * 2) * 1.5 + (reduceMotion ? 0 : Math.sin(progress.value * 150) * interpolate(progress.value, [0, 0.1, 0.22], [0, 3, 0], "clamp"))}deg`,
+      },
+    ],
+  }));
+  const lidStyle = useAnimatedStyle(() => ({
+    opacity: reduceMotion
+      ? interpolate(progress.value, [0, 0.4], [1, 0], "clamp")
+      : progress.value < 0.8
+        ? 1
+        : 0,
+    transform: [
+      {
+        translateY: reduceMotion
+          ? 0
+          : interpolate(
+              progress.value,
+              [0, 0.18, 0.45, 0.8],
+              [0, 5, -110, -40],
+              "clamp",
+            ),
+      },
+      {
+        translateX: reduceMotion
+          ? 0
+          : interpolate(
+              progress.value,
+              [0, 0.18, 0.8],
+              [0, -8, throwDistance],
+              "clamp",
+            ),
+      },
+      {
+        rotate: reduceMotion
+          ? "0deg"
+          : `${interpolate(progress.value, [0, 0.18, 0.8], [0, -4, 160], "clamp")}deg`,
+      },
+    ],
+  }));
+  const burstStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.value, [0.78, 0.86, 1], [0, 0.8, 0], "clamp"),
+    transform: [
+      {
+        scale: interpolate(progress.value, [0.78, 1], [0.4, 1.8], "clamp"),
+      },
+    ],
+  }));
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      progress.value,
+      [0.2, 0.45, 0.8, 1],
+      [0, 0.7, 0.4, 0.2],
+      "clamp",
+    ),
+    transform: [
+      {
+        scale: interpolate(progress.value, [0.2, 1], [0.5, 1.2], "clamp"),
+      },
+    ],
+  }));
+  const insideStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.value, [0, 0.2, 0.4], [0, 0, 1], "clamp"),
+  }));
+
   return (
-    <View
-      accessible
-      accessibilityLabel="Closed Pack.com mystery gift box with a gold ribbon"
-      style={styles.scene}
-    >
-      <View style={styles.shadow} />
-      <View style={styles.contactShadow} />
-      <View style={styles.body}>
-        <View style={styles.frontLight} />
-        <View style={styles.side} />
-        <View style={styles.bodyRibbon}>
-          <View style={styles.ribbonShine} />
+    <View style={styles.stage}>
+      {!opened &&
+        !reduceMotion &&
+        [0, 1, 2, 3, 4].map((index) => (
+          <ShootingStar key={index} index={index} />
+        ))}
+      <Animated.View style={[styles.scene, boxStyle]}>
+        <Animated.View pointerEvents="none" style={[styles.glow, glowStyle]} />
+        <Animated.View
+          pointerEvents="none"
+          style={[styles.prizeBurst, burstStyle]}
+        />
+        <View style={styles.shadow} />
+        <View style={styles.contactShadow} />
+        <Animated.View style={[styles.interior, insideStyle]}>
+          <View style={styles.innerFloor} />
+          <View style={styles.innerFront} />
+        </Animated.View>
+        <BoxPrize
+          progress={progress}
+          scale={scale}
+          cartRef={cartRef}
+          onAddedToCart={onAddedToCart}
+        />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Open mystery box"
+          disabled={opened}
+          onPress={onOpen}
+          style={styles.body}
+        >
+          <View style={styles.frontLight} />
+          <View style={styles.side} />
+          <View style={styles.bodyRibbon}>
+            <View style={styles.ribbonShine} />
+          </View>
+          <View style={styles.lidShadow} />
+          <View style={styles.bottomEdge} />
+          <View style={styles.label}>
+            <Feather name="package" size={18} color={palette.boxGold} />
+            <Text style={styles.brand}>Pack.com</Text>
+            <Text style={styles.caption}>SOMETHING SPECIAL</Text>
+          </View>
+        </Pressable>
+        <Animated.View pointerEvents="none" style={[styles.lid, lidStyle]}>
+          <View style={styles.lidTop} />
+          <View style={styles.topEdge} />
+          <View style={styles.topRibbon}>
+            <View style={styles.ribbonShine} />
+          </View>
+          <View style={styles.lidFront}>
+            <View style={styles.lidRibbon} />
+            <View style={styles.lidHighlight} />
+            <View style={styles.lidSide} />
+          </View>
+          <View style={[styles.ribbonTail, styles.tailLeft]} />
+          <View style={[styles.ribbonTail, styles.tailRight]} />
+          <View style={[styles.bowLoop, styles.bowLeft]} />
+          <View style={[styles.bowLoop, styles.bowRight]} />
+          <View style={styles.knot} />
+        </Animated.View>
+        <View style={styles.tagString} />
+        <View style={styles.tag}>
+          <View style={styles.tagHole} />
+          <Text style={styles.question}>?</Text>
         </View>
-        <View style={styles.lidShadow} />
-        <View style={styles.bottomEdge} />
-        <View style={styles.label}>
-          <Feather name="package" size={18} color="#EACB8B" />
-          <Text style={styles.brand}>Pack.com</Text>
-          <Text style={styles.caption}>SOMETHING SPECIAL</Text>
-        </View>
-      </View>
-      <View style={styles.lid}>
-        <View style={styles.lidTop} />
-        <View style={styles.topEdge} />
-        <View style={styles.topRibbon}>
-          <View style={styles.ribbonShine} />
-        </View>
-        <View style={styles.lidFront}>
-          <View style={styles.lidRibbon} />
-          <View style={styles.lidHighlight} />
-          <View style={styles.lidSide} />
-        </View>
-        <View style={[styles.ribbonTail, styles.tailLeft]} />
-        <View style={[styles.ribbonTail, styles.tailRight]} />
-        <View style={[styles.bowLoop, styles.bowLeft]} />
-        <View style={[styles.bowLoop, styles.bowRight]} />
-        <View style={styles.knot} />
-      </View>
-      <View style={styles.tagString} />
-      <View style={styles.tag}>
-        <View style={styles.tagHole} />
-        <Text style={styles.question}>?</Text>
-      </View>
+      </Animated.View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  stage: {
+    width: 280,
+    height: 420,
+    justifyContent: "flex-end",
+  },
+  prizeBurst: {
+    position: "absolute",
+    top: -110,
+    left: 40,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    borderWidth: 2,
+    borderColor: palette.sparkleGold,
+  },
+  glow: {
+    position: "absolute",
+    top: -120,
+    left: 25,
+    width: 230,
+    height: 230,
+    borderRadius: 115,
+    backgroundColor: palette.mysteryBoxGlowBackgroundColor,
+    boxShadow: palette.mysteryBoxGlowBoxShadow,
+  },
+  interior: {
+    position: "absolute",
+    left: 35,
+    top: 49,
+    width: 210,
+    height: 47,
+    backgroundColor: palette.mysteryBoxInteriorBackgroundColor,
+    borderWidth: 5,
+    borderTopColor: palette.mysteryBoxInteriorBorderTopColor,
+    borderLeftColor: palette.mysteryBoxInteriorBorderLeftColor,
+    borderRightColor: palette.mysteryBoxInteriorBorderRightColor,
+    borderBottomColor: palette.mysteryBoxInteriorBorderBottomColor,
+    borderRadius: 5,
+    overflow: "hidden",
+  },
+  innerFloor: {
+    position: "absolute",
+    left: 14,
+    right: 14,
+    top: 13,
+    bottom: 0,
+    backgroundColor: palette.mysteryBoxInnerFloorBackgroundColor,
+    borderTopWidth: 1,
+    borderTopColor: palette.mysteryBoxInnerFloorBorderTopColor,
+  },
+  innerFront: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 5,
+    backgroundColor: palette.mysteryBoxInnerFrontBackgroundColor,
+  },
   scene: {
     width: 280,
     height: 260,
@@ -62,7 +275,7 @@ const styles = StyleSheet.create({
     width: 236,
     height: 24,
     borderRadius: 120,
-    backgroundColor: "#00000016",
+    backgroundColor: palette.mysteryBoxShadowBackgroundColor,
   },
   contactShadow: {
     position: "absolute",
@@ -71,8 +284,8 @@ const styles = StyleSheet.create({
     width: 196,
     height: 14,
     borderRadius: 100,
-    backgroundColor: "#00000030",
-    boxShadow: "0px 4px 10px #00000030",
+    backgroundColor: palette.mysteryBoxContactShadowBackgroundColor,
+    boxShadow: palette.mysteryBoxContactShadowBoxShadow,
   },
   body: {
     position: "absolute",
@@ -80,12 +293,12 @@ const styles = StyleSheet.create({
     left: 35,
     width: 210,
     height: 142,
-    backgroundColor: "#24384B",
+    backgroundColor: palette.mysteryBoxBodyBackgroundColor,
     borderBottomLeftRadius: 5,
     borderBottomRightRadius: 5,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#3D5267",
+    borderColor: palette.mysteryBoxBodyBorderColor,
   },
   frontLight: {
     position: "absolute",
@@ -93,9 +306,9 @@ const styles = StyleSheet.create({
     left: 0,
     bottom: 7,
     width: 65,
-    backgroundColor: "#FFFFFF05",
+    backgroundColor: palette.mysteryBoxFrontLightBackgroundColor,
     borderLeftWidth: 2,
-    borderLeftColor: "#FFFFFF20",
+    borderLeftColor: palette.mysteryBoxFrontLightBorderLeftColor,
   },
   lidShadow: {
     position: "absolute",
@@ -103,8 +316,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 9,
-    backgroundColor: "#00000028",
-    boxShadow: "0px 4px 8px #00000020",
+    backgroundColor: palette.mysteryBoxLidShadowBackgroundColor,
+    boxShadow: palette.mysteryBoxLidShadowBoxShadow,
   },
   side: {
     position: "absolute",
@@ -112,9 +325,9 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 24,
-    backgroundColor: "#172737",
+    backgroundColor: palette.mysteryBoxSideBackgroundColor,
     borderLeftWidth: 1,
-    borderLeftColor: "#496073",
+    borderLeftColor: palette.mysteryBoxSideBorderLeftColor,
   },
   bodyRibbon: {
     position: "absolute",
@@ -122,10 +335,10 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 30,
-    backgroundColor: "#D2AC61",
+    backgroundColor: palette.mysteryBoxBodyRibbonBackgroundColor,
     borderLeftWidth: 2,
     borderRightWidth: 2,
-    borderColor: "#F0D18F",
+    borderColor: palette.mysteryBoxBodyRibbonBorderColor,
   },
   ribbonShine: {
     position: "absolute",
@@ -133,9 +346,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 5,
     width: 7,
-    backgroundColor: "#FFF0C444",
+    backgroundColor: palette.mysteryBoxRibbonShineBackgroundColor,
     borderRightWidth: 1,
-    borderRightColor: "#FFF3D655",
+    borderRightColor: palette.mysteryBoxRibbonShineBorderRightColor,
   },
   bottomEdge: {
     position: "absolute",
@@ -143,7 +356,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 7,
-    backgroundColor: "#00000018",
+    backgroundColor: palette.mysteryBoxBottomEdgeBackgroundColor,
   },
   label: {
     position: "absolute",
@@ -153,21 +366,21 @@ const styles = StyleSheet.create({
     height: 74,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: "#D5B879",
-    backgroundColor: "#1C2E3F",
+    borderColor: palette.mysteryBoxLabelBorderColor,
+    backgroundColor: palette.mysteryBoxLabelBackgroundColor,
     alignItems: "center",
     justifyContent: "center",
     gap: 5,
-    boxShadow: "0px 3px 5px #00000040",
+    boxShadow: palette.mysteryBoxLabelBoxShadow,
   },
   brand: {
-    color: "#F5DFB0",
+    color: palette.mysteryBoxBrandColor,
     fontSize: 17,
     fontWeight: "800",
     letterSpacing: -0.4,
   },
   caption: {
-    color: "#D5B879",
+    color: palette.mysteryBoxLabelBorderColor,
     fontSize: 6,
     letterSpacing: 1.4,
     fontWeight: "600",
@@ -187,9 +400,9 @@ const styles = StyleSheet.create({
     borderLeftWidth: 18,
     borderRightWidth: 18,
     borderBottomWidth: 42,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderBottomColor: "#476077",
+    borderLeftColor: palette.transparent,
+    borderRightColor: palette.transparent,
+    borderBottomColor: palette.mysteryBoxLidTopBorderBottomColor,
   },
   topRibbon: {
     position: "absolute",
@@ -197,10 +410,10 @@ const styles = StyleSheet.create({
     top: 0,
     width: 32,
     height: 42,
-    backgroundColor: "#E7C983",
+    backgroundColor: palette.mysteryBoxTopRibbonBackgroundColor,
     borderLeftWidth: 2,
     borderRightWidth: 2,
-    borderColor: "#F9E4AF",
+    borderColor: palette.mysteryBoxTopRibbonBorderColor,
   },
   topEdge: {
     position: "absolute",
@@ -208,7 +421,7 @@ const styles = StyleSheet.create({
     left: 18,
     right: 18,
     height: 1,
-    backgroundColor: "#B3C6D180",
+    backgroundColor: palette.mysteryBoxTopEdgeBackgroundColor,
   },
   lidFront: {
     position: "absolute",
@@ -216,9 +429,9 @@ const styles = StyleSheet.create({
     width: 230,
     height: 30,
     borderRadius: 5,
-    backgroundColor: "#304A61",
+    backgroundColor: palette.mysteryBoxLidFrontBackgroundColor,
     borderBottomWidth: 5,
-    borderBottomColor: "#122230",
+    borderBottomColor: palette.mysteryBoxLidFrontBorderBottomColor,
     overflow: "hidden",
   },
   lidRibbon: {
@@ -227,10 +440,10 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 98,
     width: 32,
-    backgroundColor: "#CDA45A",
+    backgroundColor: palette.mysteryBoxLidRibbonBackgroundColor,
     borderLeftWidth: 2,
     borderRightWidth: 2,
-    borderColor: "#F0D18F",
+    borderColor: palette.mysteryBoxBodyRibbonBorderColor,
   },
   lidHighlight: {
     position: "absolute",
@@ -238,7 +451,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 2,
-    backgroundColor: "#FFFFFF30",
+    backgroundColor: palette.mysteryBoxLidHighlightBackgroundColor,
   },
   lidSide: {
     position: "absolute",
@@ -246,18 +459,18 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     width: 24,
-    backgroundColor: "#17273788",
+    backgroundColor: palette.mysteryBoxLidSideBackgroundColor,
     borderLeftWidth: 1,
-    borderLeftColor: "#7F98AA40",
+    borderLeftColor: palette.mysteryBoxLidSideBorderLeftColor,
   },
   ribbonTail: {
     position: "absolute",
     top: 14,
     width: 16,
     height: 30,
-    backgroundColor: "#D0A45B",
+    backgroundColor: palette.mysteryBoxRibbonTailBackgroundColor,
     borderLeftWidth: 2,
-    borderLeftColor: "#F7DFA2",
+    borderLeftColor: palette.mysteryBoxRibbonTailBorderLeftColor,
     borderBottomRightRadius: 7,
   },
   tailLeft: {
@@ -282,12 +495,12 @@ const styles = StyleSheet.create({
     width: 48,
     height: 27,
     borderWidth: 7,
-    borderColor: "#E6C47E",
-    borderTopColor: "#FFE7AF",
-    borderBottomColor: "#AC7C38",
-    backgroundColor: "#31495C",
+    borderColor: palette.mysteryBoxBowLoopBorderColor,
+    borderTopColor: palette.mysteryBoxBowLoopBorderTopColor,
+    borderBottomColor: palette.mysteryBoxBowLoopBorderBottomColor,
+    backgroundColor: palette.mysteryBoxBowLoopBackgroundColor,
     borderRadius: 20,
-    boxShadow: "0px 3px 3px #00000030",
+    boxShadow: palette.mysteryBoxBowLoopBoxShadow,
   },
   bowLeft: {
     left: 68,
@@ -312,12 +525,12 @@ const styles = StyleSheet.create({
     width: 20,
     height: 17,
     borderRadius: 5,
-    backgroundColor: "#EFD495",
+    backgroundColor: palette.mysteryBoxKnotBackgroundColor,
     borderWidth: 1,
-    borderColor: "#B78A43",
-    borderTopColor: "#FFF0C9",
+    borderColor: palette.mysteryBoxKnotBorderColor,
+    borderTopColor: palette.mysteryBoxKnotBorderTopColor,
     borderBottomWidth: 3,
-    boxShadow: "0px 2px 3px #00000030",
+    boxShadow: palette.mysteryBoxKnotBoxShadow,
   },
   tagString: {
     position: "absolute",
@@ -325,7 +538,7 @@ const styles = StyleSheet.create({
     left: 175,
     width: 1,
     height: 48,
-    backgroundColor: "#E6C47E",
+    backgroundColor: palette.mysteryBoxBowLoopBorderColor,
     transform: [
       {
         rotate: "-28deg",
@@ -339,12 +552,12 @@ const styles = StyleSheet.create({
     width: 31,
     height: 43,
     borderRadius: 5,
-    backgroundColor: "#F3DEAC",
+    backgroundColor: palette.mysteryBoxTagBackgroundColor,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#FFF0CD",
-    borderBottomColor: "#C5A36B",
-    boxShadow: "2px 4px 4px #00000038",
+    borderColor: palette.mysteryBoxTagBorderColor,
+    borderBottomColor: palette.mysteryBoxTagBorderBottomColor,
+    boxShadow: palette.mysteryBoxTagBoxShadow,
     transform: [
       {
         rotate: "-12deg",
@@ -356,10 +569,10 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 2,
     marginTop: 5,
-    backgroundColor: "#7E6338",
+    backgroundColor: palette.mysteryBoxTagHoleBackgroundColor,
   },
   question: {
-    color: "#513C1F",
+    color: palette.mysteryBoxQuestionColor,
     fontSize: 24,
     fontWeight: "700",
   },

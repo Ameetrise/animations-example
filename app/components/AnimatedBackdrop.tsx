@@ -1,3 +1,4 @@
+import { palette } from "../theme/colors";
 import { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, {
@@ -74,7 +75,9 @@ export function AnimatedBackdrop({ isDark, progress }: Props) {
           styles.orb,
           styles.warm,
           {
-            backgroundColor: isDark ? "#B8742820" : "#F4C88335",
+            backgroundColor: isDark
+              ? palette.backdropDarkAmber
+              : palette.backdropLightAmber,
           },
           warmStyle,
         ]}
@@ -83,7 +86,9 @@ export function AnimatedBackdrop({ isDark, progress }: Props) {
           style={[
             styles.innerOrb,
             {
-              backgroundColor: isDark ? "#B8742818" : "#F4C88325",
+              backgroundColor: isDark
+                ? palette.backdropDarkAmberSoft
+                : palette.backdropLightAmberSoft,
             },
           ]}
         />
@@ -93,7 +98,9 @@ export function AnimatedBackdrop({ isDark, progress }: Props) {
           styles.orb,
           styles.cool,
           {
-            backgroundColor: isDark ? "#7774C520" : "#B9B4DF30",
+            backgroundColor: isDark
+              ? palette.backdropDarkViolet
+              : palette.backdropLightViolet,
           },
           coolStyle,
         ]}
@@ -102,7 +109,9 @@ export function AnimatedBackdrop({ isDark, progress }: Props) {
         style={[
           styles.orbit,
           {
-            borderColor: isDark ? "#F6DAA314" : "#B7833520",
+            borderColor: isDark
+              ? palette.backdropDarkOrbit
+              : palette.backdropLightOrbit,
           },
           orbitStyle,
         ]}
@@ -120,7 +129,9 @@ export function AnimatedBackdrop({ isDark, progress }: Props) {
               {
                 left: `${8 + ((index * 29) % 84)}%`,
                 top: `${12 + ((index * 17) % 72)}%`,
-                backgroundColor: isDark ? "#F7DCA345" : "#AD7C3540",
+                backgroundColor: isDark
+                  ? palette.backdropDarkDot
+                  : palette.backdropLightDot,
               },
             ]}
           />
@@ -176,7 +187,7 @@ const styles = StyleSheet.create({
     borderRadius: 150,
     alignSelf: "center",
     top: "30%",
-    backgroundColor: "#E8AD32",
+    backgroundColor: palette.animatedBackdropGlowBackgroundColor,
   },
   dot: {
     position: "absolute",

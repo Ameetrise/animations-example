@@ -1,3 +1,4 @@
+import { palette } from "../theme/colors";
 import { Confetti } from "../features/surprise-card/Confetti";
 import type { ComponentRef } from "react";
 import Animated, {
@@ -98,7 +99,7 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
   }
 
   const playDisabled =
-    selectedIndex !== 0 || hasPlayed || selectedCard === null;
+    hasPlayed || (selectedIndex === 0 && selectedCard === null);
 
   function playAnimation() {
     if (playDisabled) return;
@@ -122,9 +123,23 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
               easing: Easing.out(Easing.quad),
             }),
           )
-        : withTiming(1, {
-            duration: 700,
-          });
+        : withSequence(
+            withTiming(0.18, {
+              duration: 900,
+              easing: Easing.inOut(Easing.quad),
+            }),
+            withTiming(0.18, {
+              duration: 350,
+            }),
+            withTiming(0.45, {
+              duration: 900,
+              easing: Easing.in(Easing.cubic),
+            }),
+            withTiming(1, {
+              duration: 2600,
+              easing: Easing.out(Easing.quad),
+            }),
+          );
   }
 
   function addToCart() {
@@ -242,6 +257,8 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
                 availableHeight={stageHeight - 48}
                 cartRef={cartRef}
                 onAddedToCart={addToCart}
+                onReveal={playAnimation}
+                hasPlayed={hasPlayed}
                 progress={progress}
                 selectedCard={selectedCard}
                 onSelectCard={pickCard}
@@ -344,8 +361,12 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
             </View>
           </View>
         </SafeAreaView>
-        {selectedIndex === 0 && selectedCard === 0 && (
-          <Confetti key={round} progress={progress} />
+        {(selectedIndex === 1 || selectedCard === 0) && (
+          <Confetti
+            key={`${selectedIndex}-${round}`}
+            progress={progress}
+            triggerAt={selectedIndex === 1 ? 0.85 : 0.55}
+          />
         )}
       </Animated.View>
     </View>
@@ -355,7 +376,8 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: "#121212",
+    overflow: "hidden",
+    backgroundColor: palette.showcaseScreenBackdropBackgroundColor,
   },
   screen: {
     flex: 1,
@@ -379,12 +401,12 @@ const styles = StyleSheet.create({
     height: 20,
     paddingHorizontal: 4,
     borderRadius: 10,
-    backgroundColor: "#C2410C",
+    backgroundColor: palette.showcaseScreenCartBadgeBackgroundColor,
     alignItems: "center",
     justifyContent: "center",
   },
   cartCount: {
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 11,
     fontWeight: "700",
   },

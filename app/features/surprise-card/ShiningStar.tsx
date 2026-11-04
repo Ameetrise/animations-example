@@ -1,3 +1,4 @@
+import { palette } from "../../theme/colors";
 import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
@@ -110,7 +111,7 @@ export function ShiningStar({ index, progress, float }: Props) {
 const styles = StyleSheet.create({
   star: {
     position: "absolute",
-    color: "#E8AD32",
+    color: palette.animatedBackdropGlowBackgroundColor,
     fontSize: 26,
     zIndex: 3,
   },

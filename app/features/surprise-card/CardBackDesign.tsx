@@ -1,3 +1,4 @@
+import { palette } from "../../theme/colors";
 import Feather from "@expo/vector-icons/Feather";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -84,7 +85,11 @@ export function CardBackDesign({ width }: { width: number }) {
         >
           <View style={styles.emblemInset} />
           <View style={styles.upright}>
-            <Feather name="package" size={width * 0.2} color="#EACB8B" />
+            <Feather
+              name="package"
+              size={width * 0.2}
+              color={palette.boxGold}
+            />
           </View>
         </View>
         <Text
@@ -129,7 +134,7 @@ const styles = StyleSheet.create({
     width: "160%",
     height: "24%",
     top: "8%",
-    backgroundColor: "#73899C0D",
+    backgroundColor: palette.cardBackDesignSatinBandBackgroundColor,
     transform: [
       {
         rotate: "-35deg",
@@ -138,7 +143,7 @@ const styles = StyleSheet.create({
   },
   secondBand: {
     top: "65%",
-    backgroundColor: "#00000018",
+    backgroundColor: palette.mysteryBoxBottomEdgeBackgroundColor,
   },
   corner: {
     position: "absolute",
@@ -146,7 +151,7 @@ const styles = StyleSheet.create({
     height: 13,
     borderTopWidth: 2,
     borderLeftWidth: 2,
-    borderColor: "#EACB8BA0",
+    borderColor: palette.cardBackDesignCornerBorderColor,
     borderTopLeftRadius: 5,
   },
   seal: {
@@ -156,20 +161,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: "#EACB8B40",
+    borderColor: palette.cardBackDesignSealBorderColor,
   },
   petal: {
     position: "absolute",
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: "#EACB8B45",
+    borderColor: palette.cardBackDesignPetalBorderColor,
   },
   pattern: {
     position: "absolute",
     width: 18,
     height: 18,
     borderWidth: 1,
-    borderColor: "#EACB8B22",
+    borderColor: palette.cardBackDesignPatternBorderColor,
     transform: [
       {
         rotate: "45deg",
@@ -184,7 +189,7 @@ const styles = StyleSheet.create({
     left: 6,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#EACB8B90",
+    borderColor: palette.cardBackDesignOuterBorderBorderColor,
   },
   innerBorder: {
     position: "absolute",
@@ -194,15 +199,15 @@ const styles = StyleSheet.create({
     left: 10,
     borderRadius: 11,
     borderWidth: 1,
-    borderColor: "#EACB8B30",
+    borderColor: palette.cardBackDesignInnerBorderBorderColor,
   },
   center: {
     alignItems: "center",
   },
   emblem: {
-    backgroundColor: "#273A4A",
+    backgroundColor: palette.cardBackDesignEmblemBackgroundColor,
     borderWidth: 1.5,
-    borderColor: "#EACB8B",
+    borderColor: palette.boxGold,
     borderRadius: 12,
     transform: [
       {
@@ -221,7 +226,7 @@ const styles = StyleSheet.create({
     left: 4,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#EACB8B45",
+    borderColor: palette.cardBackDesignPetalBorderColor,
   },
   upright: {
     transform: [
@@ -231,24 +236,24 @@ const styles = StyleSheet.create({
     ],
   },
   brand: {
-    color: "#F5DFB0",
+    color: palette.mysteryBoxBrandColor,
     fontWeight: "800",
     letterSpacing: -0.4,
   },
   divider: {
     width: 28,
     height: 1,
-    backgroundColor: "#EACB8B60",
+    backgroundColor: palette.cardBackDesignDividerBackgroundColor,
     marginVertical: 7,
   },
   caption: {
-    color: "#D1B880",
+    color: palette.cardBackDesignCaptionColor,
     fontWeight: "600",
     letterSpacing: 1.3,
   },
   flourish: {
     position: "absolute",
-    color: "#EACB8B",
+    color: palette.boxGold,
     fontSize: 13,
   },
   top: {

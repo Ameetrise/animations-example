@@ -1,3 +1,4 @@
+import { palette } from "../../theme/colors";
 import { useEffect, useState } from "react";
 import Feather from "@expo/vector-icons/Feather";
 import { StyleSheet, Text, View } from "react-native";
@@ -137,7 +138,7 @@ export function DepositAnimation({ colors }: Props) {
         scale: interpolate(
           progress.value,
           [0.35, 0.46, 0.49, 0.58],
-          [1.2, 0.95, 1, 1.1],
+          [1.2, 1, 1, 1.1],
           "clamp",
         ),
       },
@@ -200,16 +201,8 @@ export function DepositAnimation({ colors }: Props) {
     ],
   }));
   const stampStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(progress.value, [0.38, 0.45], [0, 1], "clamp"),
+    opacity: interpolate(progress.value, [0.459, 0.46], [0, 1], "clamp"),
     transform: [
-      {
-        scale: interpolate(
-          progress.value,
-          [0.38, 0.48, 0.55],
-          [2, 0.9, 1],
-          "clamp",
-        ),
-      },
       {
         rotate: "-12deg",
       },
@@ -322,24 +315,24 @@ export function DepositAnimation({ colors }: Props) {
           </View>
           <Text style={styles.written}>Five hundred dollars</Text>
           <Text style={styles.void}>REWARD PAYMENT · 00500</Text>
-          <Animated.View style={[styles.stamp, stampStyle]}>
+          <Animated.View
+            style={[styles.stampPosition, styles.stamp, stampStyle]}
+          >
             <Text style={styles.stampText}>APPROVED</Text>
+          </Animated.View>
+          <Animated.View
+            style={[styles.stampPosition, styles.stampImpact, impactStyle]}
+          />
+          <Animated.View
+            style={[styles.stampPosition, styles.stampTool, stampToolStyle]}
+          >
+            <View style={styles.stampHandle} />
+            <View style={styles.stampBase}>
+              <Text style={styles.stampToolText}>PACK</Text>
+            </View>
           </Animated.View>
         </Animated.View>
       </View>
-      <Animated.View
-        pointerEvents="none"
-        style={[styles.stampImpact, impactStyle]}
-      />
-      <Animated.View
-        pointerEvents="none"
-        style={[styles.stampTool, stampToolStyle]}
-      >
-        <View style={styles.stampHandle} />
-        <View style={styles.stampBase}>
-          <Text style={styles.stampToolText}>PACK</Text>
-        </View>
-      </Animated.View>
       {Array.from(
         {
           length: 6,
@@ -365,7 +358,7 @@ export function DepositAnimation({ colors }: Props) {
         <Feather
           name={deposited ? "check-circle" : "credit-card"}
           size={26}
-          color="#31956A"
+          color={palette.depositAnimationAccent}
         />
         <View>
           <Text
@@ -416,45 +409,46 @@ export function DepositAnimation({ colors }: Props) {
 }
 
 const styles = StyleSheet.create({
-  stampTool: {
+  stampPosition: {
     position: "absolute",
-    top: 100,
-    right: "15%",
+    right: 18,
+    bottom: 12,
+    width: 108,
+    height: 30,
+  },
+  stampTool: {
     alignItems: "center",
     zIndex: 4,
   },
   stampHandle: {
+    position: "absolute",
+    bottom: 28,
     width: 26,
     height: 23,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
-    backgroundColor: "#8D572F",
+    backgroundColor: palette.depositAnimationStampHandleBackgroundColor,
   },
   stampBase: {
-    width: 85,
-    height: 26,
+    width: "100%",
+    height: "100%",
     borderRadius: 5,
-    backgroundColor: "#244A37",
+    backgroundColor: palette.depositAnimationStampBaseBackgroundColor,
     alignItems: "center",
     justifyContent: "center",
     borderBottomWidth: 4,
-    borderBottomColor: "#183626",
+    borderBottomColor: palette.depositAnimationStampBaseBorderBottomColor,
   },
   stampToolText: {
-    color: "#E7BD62",
+    color: palette.gold,
     fontSize: 10,
     fontWeight: "800",
     letterSpacing: 2,
   },
   stampImpact: {
-    position: "absolute",
-    top: 102,
-    right: "13%",
-    width: 95,
-    height: 70,
-    borderRadius: 48,
+    borderRadius: 5,
     borderWidth: 2,
-    borderColor: "#65BB85",
+    borderColor: palette.depositAnimationStampImpactBorderColor,
     zIndex: 3,
   },
   transferSpark: {
@@ -464,7 +458,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#76C89A",
+    backgroundColor: palette.depositAnimationTransferSparkBackgroundColor,
     zIndex: 3,
   },
   scene: {
@@ -502,7 +496,7 @@ const styles = StyleSheet.create({
     width: 5,
     height: 5,
     borderRadius: 3,
-    backgroundColor: "#31956A",
+    backgroundColor: palette.depositAnimationAccent,
   },
   slot: {
     width: 236,
@@ -515,7 +509,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 3,
-    backgroundColor: "#68C592",
+    backgroundColor: palette.depositAnimationScanBackgroundColor,
   },
   bankHalo: {
     position: "absolute",
@@ -523,7 +517,7 @@ const styles = StyleSheet.create({
     width: 250,
     height: 96,
     borderRadius: 22,
-    backgroundColor: "#7CCBA0",
+    backgroundColor: palette.depositAnimationBankHaloBackgroundColor,
   },
   accountName: {
     fontSize: 12,
@@ -533,8 +527,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 12,
     top: -15,
-    backgroundColor: "#D8F5E4",
-    color: "#19663D",
+    backgroundColor: palette.depositAnimationCreditBackgroundColor,
+    color: palette.depositAnimationCreditColor,
     borderRadius: 10,
     padding: 5,
     fontWeight: "700",
@@ -554,16 +548,16 @@ const styles = StyleSheet.create({
     height: 105,
     padding: 12,
     borderRadius: 5,
-    backgroundColor: "#F2FAEE",
+    backgroundColor: palette.depositAnimationCheckBackgroundColor,
     borderWidth: 1,
-    borderColor: "#AEC7A3",
+    borderColor: palette.depositAnimationCheckBorderColor,
     gap: 8,
   },
   issuer: {
     fontSize: 8,
     fontWeight: "700",
     letterSpacing: 1,
-    color: "#315C40",
+    color: palette.depositAnimationIssuerColor,
   },
   checkRow: {
     flexDirection: "row",
@@ -572,35 +566,34 @@ const styles = StyleSheet.create({
   },
   payee: {
     fontSize: 12,
-    color: "#315C40",
+    color: palette.depositAnimationIssuerColor,
   },
   amount: {
     fontSize: 23,
     fontWeight: "800",
-    color: "#195A39",
+    color: palette.depositAnimationAmountColor,
   },
   written: {
     fontSize: 10,
-    color: "#315C40",
+    color: palette.depositAnimationIssuerColor,
   },
   void: {
     fontSize: 7,
-    color: "#58725D",
+    color: palette.depositAnimationVoidColor,
   },
   stamp: {
-    position: "absolute",
-    right: 18,
-    bottom: 12,
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 2,
-    borderColor: "#258353",
+    borderColor: palette.depositAnimationStampBorderColor,
     paddingHorizontal: 7,
     paddingVertical: 3,
-    backgroundColor: "#F2FAEEDD",
+    backgroundColor: palette.depositAnimationStampBackgroundColor,
   },
   stampText: {
     fontSize: 14,
     fontWeight: "900",
-    color: "#258353",
+    color: palette.depositAnimationStampBorderColor,
   },
   bank: {
     position: "absolute",

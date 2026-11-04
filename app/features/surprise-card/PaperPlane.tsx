@@ -1,3 +1,4 @@
+import { palette } from "../../theme/colors";
 import { StyleSheet, View } from "react-native";
 import Animated, {
   interpolate,
@@ -60,7 +61,7 @@ export function PaperPlane({ flight, flightX, flightY, size }: Props) {
               top: 0,
               borderLeftWidth: size,
               borderTopWidth: size * 0.34,
-              borderLeftColor: "#FFF8E8",
+              borderLeftColor: palette.planeIvory,
             },
             upperStyle,
           ]}
@@ -72,7 +73,7 @@ export function PaperPlane({ flight, flightX, flightY, size }: Props) {
               top: size * 0.34,
               borderLeftWidth: size,
               borderBottomWidth: size * 0.34,
-              borderLeftColor: "#D9BC7C",
+              borderLeftColor: palette.planeGold,
             },
             lowerStyle,
           ]}
@@ -105,12 +106,12 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 0,
     height: 0,
-    borderTopColor: "transparent",
-    borderBottomColor: "transparent",
+    borderTopColor: palette.transparent,
+    borderBottomColor: palette.transparent,
   },
   crease: {
     position: "absolute",
     height: 1,
-    backgroundColor: "#B28C48",
+    backgroundColor: palette.paperPlaneCreaseBackgroundColor,
   },
 });

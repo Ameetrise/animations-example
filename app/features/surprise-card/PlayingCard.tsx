@@ -1,3 +1,4 @@
+import { palette } from "../../theme/colors";
 import { PaperPlane } from "./PaperPlane";
 import { CardBackDesign } from "./CardBackDesign";
 import { type ComponentRef, useEffect, useRef, type RefObject } from "react";
@@ -350,7 +351,9 @@ export function PlayingCard({
             styles.face,
             styles.front,
             {
-              borderColor: selected ? "#FCD34D" : "#E9C994",
+              borderColor: selected
+                ? palette.cardSelectedBorder
+                : palette.cardBorder,
             },
             frontStyle,
           ]}
@@ -384,7 +387,7 @@ export function PlayingCard({
             ) : product.icon === "dollar-sign" ? (
               <View style={styles.moneyPrize}>
                 <View style={styles.rewardIcon}>
-                  <Feather name="award" size={24} color="#E7BD62" />
+                  <Feather name="award" size={24} color={palette.gold} />
                 </View>
                 <Text style={styles.moneyLabel}>YOU WON</Text>
                 <Text
@@ -398,7 +401,7 @@ export function PlayingCard({
                 <Text style={styles.moneyCaption}>A little lucky moment.</Text>
               </View>
             ) : (
-              <Feather name={product.icon} size={64} color="#9A3412" />
+              <Feather name={product.icon} size={64} color={palette.copper} />
             )}
             {product.icon === "dollar-sign" ? (
               <View style={styles.collect}>
@@ -409,7 +412,11 @@ export function PlayingCard({
                 >
                   Collect reward
                 </Text>
-                <Feather name="arrow-up-right" size={13} color="#153C2C" />
+                <Feather
+                  name="arrow-up-right"
+                  size={13}
+                  color={palette.rewardDarkGreen}
+                />
               </View>
             ) : (
               <Text style={styles.reveal}>YOUR PICK</Text>
@@ -442,8 +449,8 @@ const styles = StyleSheet.create({
     left: 0,
   },
   cashBack: {
-    backgroundColor: "#153C2C",
-    borderColor: "#D9B970",
+    backgroundColor: palette.rewardDarkGreen,
+    borderColor: palette.playingCardCashBackBorderColor,
     padding: 10,
   },
   moneyPrize: {
@@ -456,12 +463,12 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: "#FFFFFF0D",
+    backgroundColor: palette.playingCardRewardIconBackgroundColor,
     alignItems: "center",
     justifyContent: "center",
   },
   moneyCaption: {
-    color: "#CCE0D3",
+    color: palette.playingCardMoneyCaptionColor,
     fontSize: 9,
     textAlign: "center",
   },
@@ -474,19 +481,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 3,
-    backgroundColor: "#E7BD62",
+    backgroundColor: palette.gold,
     borderRadius: 14,
     paddingVertical: 8,
     paddingHorizontal: 5,
   },
   collectText: {
-    color: "#153C2C",
+    color: palette.rewardDarkGreen,
     fontSize: 10,
     fontWeight: "700",
     flexShrink: 1,
   },
   moneyLabel: {
-    color: "#E7BD62",
+    color: palette.gold,
     fontSize: 11,
     fontWeight: "700",
     letterSpacing: 1,
@@ -494,7 +501,7 @@ const styles = StyleSheet.create({
   moneyAmount: {
     width: "100%",
     textAlign: "center",
-    color: "#FFFFFF",
+    color: palette.white,
     fontSize: 42,
     fontWeight: "800",
   },
@@ -518,21 +525,21 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   front: {
-    backgroundColor: "#182433",
+    backgroundColor: palette.playingCardFrontBackgroundColor,
   },
   back: {
-    backgroundColor: "#FFF8E7",
-    borderColor: "#E9C994",
+    backgroundColor: palette.playingCardBackBackgroundColor,
+    borderColor: palette.cardBorder,
     gap: 17,
     padding: 24,
   },
   photoBack: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
   },
   reveal: {
     position: "absolute",
     bottom: 24,
-    color: "#9A3412",
+    color: palette.copper,
     fontSize: 14,
     letterSpacing: 1,
     fontWeight: "700",
@@ -543,6 +550,6 @@ const styles = StyleSheet.create({
     bottom: -30,
     left: 0,
     width: 45,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
   },
 });

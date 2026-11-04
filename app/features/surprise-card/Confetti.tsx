@@ -1,3 +1,4 @@
+import { palette } from "../../theme/colors";
 import { useEffect, useState } from "react";
 import { View, StyleSheet, useWindowDimensions } from "react-native";
 import Animated, {
@@ -12,12 +13,12 @@ import Animated, {
 } from "react-native-reanimated";
 
 const colors = [
-  "#E7BD62",
-  "#69BB92",
-  "#E58DB0",
-  "#938BD8",
-  "#64BDD0",
-  "#FF985D",
+  palette.gold,
+  palette.confettiGreen,
+  palette.confettiPink,
+  palette.confettiPurple,
+  palette.confettiBlue,
+  palette.confettiOrange,
 ];
 
 function Piece({
@@ -94,11 +95,17 @@ function Piece({
   );
 }
 
-export function Confetti({ progress }: { progress: SharedValue<number> }) {
+export function Confetti({
+  progress,
+  triggerAt = 0.55,
+}: {
+  progress: SharedValue<number>;
+  triggerAt?: number;
+}) {
   const { width, height } = useWindowDimensions();
   const burst = useSharedValue(0);
   useAnimatedReaction(
-    () => progress.value >= 0.55,
+    () => progress.value >= triggerAt,
     (revealed, previous) => {
       if (revealed && !previous) {
         burst.value = 0;

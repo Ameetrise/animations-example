@@ -1,17 +1,18 @@
+import { palette } from "./colors";
 export const lightColors = {
-  background: "#FAF7F1",
-  surface: "#FFFFFF",
-  text: "#202124",
-  muted: "#63666D",
-  border: "#E0E1E5",
+  background: palette.lightBackground,
+  surface: palette.white,
+  text: palette.lightText,
+  muted: palette.lightMuted,
+  border: palette.lightBorder,
 };
 
 export const darkColors = {
-  background: "#14151F",
-  surface: "#202124",
-  text: "#F5F5F7",
-  muted: "#B5B7BD",
-  border: "#404249",
+  background: palette.darkBackground,
+  surface: palette.lightText,
+  text: palette.darkText,
+  muted: palette.darkMuted,
+  border: palette.darkBorder,
 };
 
 export type ThemeColors = typeof lightColors;
