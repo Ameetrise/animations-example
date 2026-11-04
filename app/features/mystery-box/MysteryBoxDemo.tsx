@@ -1,3 +1,4 @@
+import { brandName } from "../../config/brand";
 import { useState } from "react";
 import Animated, {
   interpolate,
@@ -49,7 +50,7 @@ export function MysteryBoxDemo({
           },
         ]}
       >
-        PACK.COM · MYSTERY BOX
+        {brandName} · MYSTERY BOX
       </Text>
       <Animated.Text
         accessibilityLiveRegion="polite"

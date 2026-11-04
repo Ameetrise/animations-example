@@ -1,3 +1,4 @@
+import { brandName } from "../../config/brand";
 import { palette } from "../../theme/colors";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
@@ -137,7 +138,7 @@ export function SurpriseCardDemo({
         style={styles.brandRow}
       >
         <Animated.Text style={[styles.brand, brandStyle]}>
-          Pack.com
+          {brandName}
         </Animated.Text>
         <View
           style={[

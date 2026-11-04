@@ -1,3 +1,4 @@
+import { isSpinQuest } from "../../config/brand";
 import { useMemo } from "react";
 import { Asset } from "expo-asset";
 import { Box3, Vector3 } from "three";
@@ -5,7 +6,9 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { useLoader } from "./renderer";
 
 const modelUri = Asset.fromModule(
-  require("../../../assets/headphones-realistic.glb"),
+  isSpinQuest
+    ? require("../../../assets/headphones-spinquest.glb")
+    : require("../../../assets/headphones-realistic.glb"),
 ).uri;
 
 export function HeadphonesModel() {

@@ -1,3 +1,4 @@
+import { brandName } from "../../config/brand";
 import {
   Component,
   useEffect,
@@ -114,7 +115,7 @@ export function ThreeDRevealDemo({
           },
         ]}
       >
-        PACK.COM · 3D REVEAL
+        {brandName} · 3D REVEAL
       </Text>
       <Text
         style={[
@@ -207,7 +208,7 @@ export function ThreeDRevealDemo({
           : added
             ? "AirPods Max added to your cart."
             : complete
-              ? "Tap your headphones for a closer look."
+              ? "Tap your headphones to add to cart."
               : hasPlayed
                 ? "Watch the flaps unfold…"
                 : "Tap the box or press Reveal."}

@@ -1,3 +1,4 @@
+import { isSpinQuest } from "../../config/brand";
 import { useEffect, useMemo } from "react";
 import {
   AnimationMixer,
@@ -16,7 +17,9 @@ import { WinningPrize, type PrizePosition } from "./WinningPrize";
 import { RevealEffects } from "./RevealEffects";
 
 const modelUri = Asset.fromModule(
-  require("../../../assets/pack-com-reveal.glb"),
+  isSpinQuest
+    ? require("../../../assets/spinquest-reveal.glb")
+    : require("../../../assets/pack-com-reveal.glb"),
 ).uri;
 
 type Props = {
@@ -46,7 +49,7 @@ export function BoxModel({
     openingClip.duration = 200 / 30;
     openingClip.trim();
     const boxRotation = openingClip.tracks.find((track) =>
-      track.name.startsWith("PACK_COM_Reveal_Root."),
+      track.name.endsWith("Reveal_Root.quaternion"),
     );
     if (boxRotation) {
       const stopFrame = boxRotation.times.findIndex((time) => time >= 3.3);

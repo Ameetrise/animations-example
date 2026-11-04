@@ -1,3 +1,4 @@
+import { brandName } from "../../config/brand";
 import { palette } from "../../theme/colors";
 import { useEffect, useState } from "react";
 import Feather from "@expo/vector-icons/Feather";
@@ -308,7 +309,7 @@ export function DepositAnimation({ colors }: Props) {
       <View pointerEvents="none" style={styles.paperWindow}>
         <Animated.View style={[styles.check, checkStyle]}>
           <Animated.View style={[styles.scan, scanStyle]} />
-          <Text style={styles.issuer}>PACK.COM REWARDS</Text>
+          <Text style={styles.issuer}>{brandName} REWARDS</Text>
           <View style={styles.checkRow}>
             <Text style={styles.payee}>Pay to: You</Text>
             <Text style={styles.amount}>$500.00</Text>

@@ -1,3 +1,4 @@
+import { brandName } from "../../config/brand";
 import { palette } from "../../theme/colors";
 import Feather from "@expo/vector-icons/Feather";
 import { StyleSheet, Text, View } from "react-native";
@@ -100,7 +101,7 @@ export function CardBackDesign({ width }: { width: number }) {
             },
           ]}
         >
-          Pack.com
+          {brandName}
         </Text>
         <View style={styles.divider} />
         <Text

@@ -1,3 +1,4 @@
+import { brandName } from "../../config/brand";
 import { palette } from "../../theme/colors";
 import Feather from "@expo/vector-icons/Feather";
 import { useEffect } from "react";
@@ -205,7 +206,7 @@ export function MysteryBox({
           <View style={styles.bottomEdge} />
           <View style={styles.label}>
             <Feather name="package" size={18} color={palette.boxGold} />
-            <Text style={styles.brand}>Pack.com</Text>
+            <Text style={styles.brand}>{brandName}</Text>
             <Text style={styles.caption}>SOMETHING SPECIAL</Text>
           </View>
         </Pressable>
