@@ -1,3 +1,4 @@
+import { WinningSound } from "../components/WinningSound";
 import { palette } from "../theme/colors";
 import { Confetti } from "../features/surprise-card/Confetti";
 import type { ComponentRef } from "react";
@@ -362,6 +363,13 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
             </View>
           </View>
         </SafeAreaView>
+        <WinningSound
+          key={`sound-${selectedIndex}-${round}`}
+          progress={progress}
+          triggerAt={
+            selectedIndex === 2 ? 0.6 : selectedIndex === 1 ? 0.85 : 0.55
+          }
+        />
         {(selectedIndex !== 0 || selectedCard === 0) && (
           <Confetti
             key={`${selectedIndex}-${round}`}

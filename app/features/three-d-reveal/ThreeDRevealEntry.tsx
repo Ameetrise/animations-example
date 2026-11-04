@@ -1,12 +1,19 @@
-import { Component, lazy, Suspense, type ReactNode } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { Component, type ReactNode } from "react";
+import { StyleSheet, Text, View } from "react-native";
 import type { DemoProps } from "../types";
 
-const ThreeDReveal = lazy(() =>
-  import("./ThreeDRevealDemo").then((module) => ({
-    default: module.ThreeDRevealDemo,
-  })),
-);
+function ThreeDReveal(props: DemoProps) {
+  const { ThreeDRevealDemo } =
+    require("./ThreeDRevealDemo") as typeof import("./ThreeDRevealDemo");
+
+  if (typeof ThreeDRevealDemo !== "function") {
+    throw new Error(
+      "The 3D screen did not load correctly. Restart Metro with --clear.",
+    );
+  }
+
+  return <ThreeDRevealDemo {...props} />;
+}
 
 class RendererBoundary extends Component<
   { children: ReactNode; textColor: string },
@@ -41,7 +48,7 @@ class RendererBoundary extends Component<
               },
             ]}
           >
-            The 3D renderer could not start. Update Expo Go, then press Reset.
+            The 3D renderer could not start. Restart the app and try again.
           </Text>
           <Text
             selectable
@@ -64,9 +71,7 @@ class RendererBoundary extends Component<
 export function ThreeDRevealEntry(props: DemoProps) {
   return (
     <RendererBoundary textColor={props.colors.text}>
-      <Suspense fallback={<ActivityIndicator color={props.colors.text} />}>
-        <ThreeDReveal {...props} />
-      </Suspense>
+      <ThreeDReveal {...props} />
     </RendererBoundary>
   );
 }

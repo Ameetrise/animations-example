@@ -91,7 +91,12 @@ export function BoxModel({ playing, onReady, onComplete, onReveal }: Props) {
   }, [model, playing, reduceMotion]);
 
   useFrame((_, delta) => {
-    if (playing && !reduceMotion) model.mixer.update(Math.min(delta, 0.05));
+    if (!playing || reduceMotion) return;
+    const frameTime = Math.min(delta, 0.05);
+    const remaining = model.action.getClip().duration - model.mixer.time;
+    model.mixer.update(
+      remaining > 0 ? Math.min(frameTime * 2.5, remaining) : frameTime,
+    );
   });
 
   return (
