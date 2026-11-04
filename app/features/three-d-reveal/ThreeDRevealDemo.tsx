@@ -8,7 +8,13 @@ import {
   type ComponentRef,
   type ReactNode,
 } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { cancelAnimation, Easing, withTiming } from "react-native-reanimated";
 import type { DemoProps } from "../types";
 import { Canvas } from "./renderer";
@@ -49,6 +55,8 @@ export function ThreeDRevealDemo({
   const claiming = useRef(false);
   const [flight, setFlight] = useState<CartFlight | null>(null);
   const [added, setAdded] = useState(false);
+  const [flightVisible, setFlightVisible] = useState(false);
+  const onFlightVisible = useCallback(() => setFlightVisible(true), []);
 
   function claimPrize(position: PrizePosition) {
     if (claiming.current || !viewportRef.current || !cartRef.current) return;
@@ -62,6 +70,7 @@ export function ThreeDRevealDemo({
             x: x + position.x,
             y: y + position.y,
             size: position.size,
+            rotation: position.rotation,
           },
           end: {
             x: cartX + width / 2,
@@ -145,6 +154,7 @@ export function ThreeDRevealDemo({
             camera={{
               position: [4, 3.2, 5],
               fov: 50,
+              zoom: Platform.OS === "web" ? 1.5 : 1,
             }}
           >
             <ambientLight intensity={1.5} />
@@ -161,7 +171,7 @@ export function ThreeDRevealDemo({
             <Suspense fallback={null}>
               <BoxModel
                 playing={hasPlayed}
-                claimed={flight !== null || added}
+                claimed={flightVisible || added}
                 onClaim={claimPrize}
                 onReady={onReady}
                 onComplete={onComplete}
@@ -176,7 +186,13 @@ export function ThreeDRevealDemo({
           )}
         </ModelBoundary>
       </View>
-      {flight && <PrizeCartFlight flight={flight} onComplete={finishFlight} />}
+      {flight && (
+        <PrizeCartFlight
+          flight={flight}
+          onComplete={finishFlight}
+          onVisible={onFlightVisible}
+        />
+      )}
       <Text
         accessibilityLiveRegion="polite"
         style={[
@@ -191,7 +207,7 @@ export function ThreeDRevealDemo({
           : added
             ? "AirPods Max added to your cart."
             : complete
-              ? "Tap your headphones to add them to your cart."
+              ? "Tap your headphones for a closer look."
               : hasPlayed
                 ? "Watch the flaps unfold…"
                 : "Tap the box or press Reveal."}

@@ -1,5 +1,5 @@
 import { useMemo, useRef } from "react";
-import { AnimationMixer, Group, Vector3 } from "three";
+import { AnimationMixer, Group, Quaternion, Vector3 } from "three";
 import { useFrame, useThree } from "./renderer";
 import { HeadphonesModel } from "./HeadphonesModel";
 
@@ -7,6 +7,7 @@ export type PrizePosition = {
   x: number;
   y: number;
   size: number;
+  rotation: [number, number, number, number];
 };
 
 type Props = {
@@ -28,6 +29,8 @@ export function WinningPrize({
   const { camera, size } = useThree();
   const world = useMemo(() => new Vector3(), []);
   const top = useMemo(() => new Vector3(), []);
+  const orientation = useMemo(() => new Quaternion(), []);
+  const cameraRotation = useMemo(() => new Quaternion(), []);
   const worldScale = useMemo(() => new Vector3(), []);
 
   useFrame(() => {
@@ -57,11 +60,15 @@ export function WinningPrize({
       .applyQuaternion(camera.quaternion)
       .multiplyScalar(1.1 * worldScale.y)
       .add(world);
+    prize.current.getWorldQuaternion(orientation);
+    cameraRotation.copy(camera.quaternion).invert();
+    orientation.premultiply(cameraRotation);
     world.project(camera);
     top.project(camera);
     onClaim({
       x: ((world.x + 1) * size.width) / 2,
       y: ((1 - world.y) * size.height) / 2,
+      rotation: [orientation.x, orientation.y, orientation.z, orientation.w],
       size: Math.max(24, Math.abs(top.y - world.y) * size.height),
     });
   }

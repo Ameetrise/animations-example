@@ -1,6 +1,12 @@
-import { Suspense, useRef } from "react";
-import { Modal, StyleSheet, View, useWindowDimensions } from "react-native";
-import { Group, MathUtils } from "three";
+import { Suspense, useMemo, useRef } from "react";
+import {
+  Modal,
+  Platform,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import { Group, MathUtils, Quaternion } from "three";
 import { useReducedMotion } from "react-native-reanimated";
 import { Canvas, useFrame } from "./renderer";
 import { HeadphonesModel } from "./HeadphonesModel";
@@ -18,23 +24,45 @@ export type CartFlight = {
 type Props = {
   flight: CartFlight;
   onComplete: () => void;
+  onVisible: () => void;
 };
 
-function FlyingHeadphones({ flight, onComplete }: Props) {
+function FlyingHeadphones({ flight, onComplete, onVisible }: Props) {
   const group = useRef<Group>(null);
+  const startRotation = useMemo(
+    () => new Quaternion(...flight.start.rotation),
+    [flight],
+  );
+  const frontRotation = useMemo(() => new Quaternion(), []);
   const elapsed = useRef(0);
+  const renderedFrames = useRef(0);
   const finished = useRef(false);
   const { width, height } = useWindowDimensions();
   const reduceMotion = useReducedMotion();
 
   useFrame((_, delta) => {
     if (!group.current || finished.current) return;
+    renderedFrames.current += 1;
+    if (renderedFrames.current < 3) return;
+    if (renderedFrames.current === 3) onVisible();
     elapsed.current += Math.min(delta, 0.05);
-    const t = Math.min(elapsed.current / (reduceMotion ? 0.25 : 1.4), 1);
-    const travel = Math.max(0, (t - 0.4) / 0.6);
+    const t = Math.min(elapsed.current / (reduceMotion ? 0.25 : 3.2), 1);
+    const zoom = Math.min(t / 0.25, 1);
+    const zoomEase = 1 - Math.pow(1 - zoom, 3);
+    const travel = Math.max(0, (t - 0.65) / 0.35);
     const ease = travel * travel * (3 - 2 * travel);
-    const x = MathUtils.lerp(flight.start.x, flight.end.x, ease);
-    const y = MathUtils.lerp(flight.start.y, flight.end.y, ease);
+    const focusX = width / 2;
+    const focusY = height * 0.42;
+    const zoomX = MathUtils.lerp(flight.start.x, focusX, zoomEase);
+    const zoomY = MathUtils.lerp(flight.start.y, focusY, zoomEase);
+    const x = MathUtils.lerp(zoomX, flight.end.x, ease);
+    const y = MathUtils.lerp(zoomY, flight.end.y, ease);
+    const focusSize = Math.min(
+      260 * (Platform.OS === "web" ? 1.5 : 1),
+      width * 0.75,
+      height * 0.4,
+    );
+    const displaySize = MathUtils.lerp(flight.start.size, focusSize, zoomEase);
     group.current.position.set(
       (reduceMotion ? flight.start.x : x) - width / 2,
       height / 2 -
@@ -42,14 +70,18 @@ function FlyingHeadphones({ flight, onComplete }: Props) {
         Math.sin(travel * Math.PI) * 55,
       0,
     );
-    group.current.rotation.y = reduceMotion
-      ? 0.5
-      : 0.5 + Math.min(t / 0.4, 1) * Math.PI * 2;
-    group.current.rotation.z = reduceMotion
-      ? 0
-      : Math.sin(travel * Math.PI) * -0.3;
+    group.current.quaternion.slerpQuaternions(
+      startRotation,
+      frontRotation,
+      reduceMotion ? 1 : zoomEase,
+    );
+    if (travel > 0 && !reduceMotion) {
+      group.current.rotation.y += ease * Math.PI * 2;
+      group.current.rotation.z += Math.sin(travel * Math.PI) * -0.3;
+    }
     group.current.scale.setScalar(
-      (flight.start.size / 2.2) * (1 - (reduceMotion ? t : ease) * 0.94),
+      ((reduceMotion ? flight.start.size : displaySize) / 2.2) *
+        (1 - (reduceMotion ? t : ease) * 0.96),
     );
     if (t === 1) {
       finished.current = true;
@@ -60,6 +92,7 @@ function FlyingHeadphones({ flight, onComplete }: Props) {
   return (
     <group
       ref={group}
+      quaternion={startRotation}
       scale={flight.start.size / 2.2}
       position={[flight.start.x - width / 2, height / 2 - flight.start.y, 0]}
     >
@@ -68,7 +101,7 @@ function FlyingHeadphones({ flight, onComplete }: Props) {
   );
 }
 
-export function PrizeCartFlight({ flight, onComplete }: Props) {
+export function PrizeCartFlight({ flight, onComplete, onVisible }: Props) {
   return (
     <Modal
       transparent
@@ -98,7 +131,11 @@ export function PrizeCartFlight({ flight, onComplete }: Props) {
             color={palette.planeIvory}
           />
           <Suspense fallback={null}>
-            <FlyingHeadphones flight={flight} onComplete={onComplete} />
+            <FlyingHeadphones
+              flight={flight}
+              onComplete={onComplete}
+              onVisible={onVisible}
+            />
           </Suspense>
         </Canvas>
       </View>

@@ -1,4 +1,3 @@
-import "./reportStartupError";
 import "react-native-reanimated";
 import { registerRootComponent } from "expo";
 

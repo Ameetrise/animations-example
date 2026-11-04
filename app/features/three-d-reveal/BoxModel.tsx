@@ -42,7 +42,27 @@ export function BoxModel({
   const model = useMemo(() => {
     const scene = gltf.scene.clone(true);
     const mixer = new AnimationMixer(scene);
-    const action = mixer.clipAction(gltf.animations[0]);
+    const openingClip = gltf.animations[0].clone();
+    openingClip.duration = 200 / 30;
+    openingClip.trim();
+    const boxRotation = openingClip.tracks.find((track) =>
+      track.name.startsWith("PACK_COM_Reveal_Root."),
+    );
+    if (boxRotation) {
+      const stopFrame = boxRotation.times.findIndex((time) => time >= 3.3);
+      const rotation = boxRotation.values.slice(
+        stopFrame * 4,
+        stopFrame * 4 + 4,
+      );
+      for (
+        let frame = stopFrame + 1;
+        frame < boxRotation.times.length;
+        frame += 1
+      ) {
+        boxRotation.values.set(rotation, frame * 4);
+      }
+    }
+    const action = mixer.clipAction(openingClip);
     action.setLoop(LoopOnce, 1);
     action.clampWhenFinished = true;
     action.play();

@@ -167,7 +167,13 @@ export function MysteryBox({
         [0, 1, 2, 3, 4].map((index) => (
           <ShootingStar key={index} index={index} />
         ))}
-      <Animated.View style={[styles.scene, boxStyle]}>
+      <BoxPrize
+        progress={progress}
+        scale={scale}
+        cartRef={cartRef}
+        onAddedToCart={onAddedToCart}
+      />
+      <Animated.View pointerEvents="box-none" style={[styles.scene, boxStyle]}>
         <Animated.View pointerEvents="none" style={[styles.glow, glowStyle]} />
         <Animated.View
           pointerEvents="none"
@@ -183,12 +189,6 @@ export function MysteryBox({
           <View style={styles.innerFloor} />
           <View style={styles.innerFront} />
         </Animated.View>
-        <BoxPrize
-          progress={progress}
-          scale={scale}
-          cartRef={cartRef}
-          onAddedToCart={onAddedToCart}
-        />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Open mystery box"

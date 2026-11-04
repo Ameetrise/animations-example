@@ -140,7 +140,7 @@ export function BoxPrize({ progress, cartRef, onAddedToCart, scale }: Props) {
         },
       ]}
     >
-      <Animated.View style={prizeStyle}>
+      <Animated.View style={[styles.prizeContainer, prizeStyle]}>
         <Pressable
           ref={prizeRef}
           collapsable={false}
@@ -168,10 +168,14 @@ export function BoxPrize({ progress, cartRef, onAddedToCart, scale }: Props) {
 const styles = StyleSheet.create({
   window: {
     position: "absolute",
-    top: -150,
+    top: 10,
     left: 35,
     width: 210,
     height: 242,
+  },
+  prizeContainer: {
+    width: 210,
+    height: 198,
   },
   prize: {
     paddingTop: 10,
