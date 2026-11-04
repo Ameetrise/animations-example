@@ -3,6 +3,7 @@ import Feather from "@expo/vector-icons/Feather";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
 import { demos } from "../features/demos";
+import { FpsCounter } from "../components/FpsCounter";
 import { spacing, type ThemeColors } from "../theme/tokens";
 
 type Props = {
@@ -15,6 +16,8 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const progress = useRef(new Animated.Value(0)).current;
   const rotation = useRef(new Animated.Value(0)).current;
+  const themeOpacity = useRef(new Animated.Value(1)).current;
+  const changingTheme = useRef(false);
   const turns = useRef(0);
   const selectedDemo = demos[selectedIndex];
   const Demo = selectedDemo.Component;
@@ -23,17 +26,36 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
     return () => {
       progress.stopAnimation();
       rotation.stopAnimation();
+      themeOpacity.stopAnimation();
     };
-  }, [progress, rotation]);
+  }, [progress, rotation, themeOpacity]);
+
+  useEffect(() => {
+    Animated.timing(themeOpacity, {
+      toValue: 1,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      if (finished) changingTheme.current = false;
+    });
+  }, [isDark, themeOpacity]);
 
   function toggleTheme() {
+    if (changingTheme.current) return;
+    changingTheme.current = true;
     turns.current += 1;
     Animated.timing(rotation, {
       toValue: turns.current,
-      duration: 350,
+      duration: 500,
       useNativeDriver: true,
     }).start();
-    onToggleTheme();
+    Animated.timing(themeOpacity, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      if (finished) onToggleTheme();
+    });
   }
 
   function playAnimation() {
@@ -45,10 +67,9 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
     }).start();
   }
 
-  function restartAnimation() {
+  function resetAnimation() {
     progress.stopAnimation();
     progress.setValue(0);
-    playAnimation();
   }
 
   function selectDemo(index: number) {
@@ -58,128 +79,119 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
   }
 
   return (
-    <SafeAreaView
-      style={[styles.screen, { backgroundColor: colors.background }]}
-    >
-      <View style={styles.header}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={
-            isDark ? "Switch to light mode" : "Switch to dark mode"
-          }
-          onPress={toggleTheme}
-          style={[
-            styles.themeButton,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-          ]}
+    <View style={styles.backdrop}>
+      <Animated.View style={[styles.screen, { opacity: themeOpacity }]}>
+        <SafeAreaView
+          style={[styles.screen, { backgroundColor: colors.background }]}
         >
-          <Animated.View
-            style={{
-              transform: [
-                {
-                  rotate: rotation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ["0deg", "360deg"],
-                  }),
-                },
-              ],
-            }}
-          >
-            <Feather
-              name={isDark ? "sun" : "moon"}
-              size={24}
-              color={colors.text}
-            />
-          </Animated.View>
-        </Pressable>
-      </View>
-      <View style={styles.stage}>
-        <Animated.View
-          key={selectedDemo.id}
-          style={[
-            styles.preview,
-            {
-              opacity: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.4, 1],
-              }),
-              transform: [
-                {
-                  scale: progress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.8, 1],
-                  }),
-                },
-              ],
-            },
-          ]}
-        >
-          <Demo colors={colors} />
-        </Animated.View>
-      </View>
-
-      <View style={[styles.controls, { backgroundColor: colors.surface }]}>
-        <View style={styles.row}>
-          {demos.map((demo, index) => (
+          <View style={styles.header}>
+            <FpsCounter colors={colors} />
             <Pressable
-              key={demo.id}
               accessibilityRole="button"
-              accessibilityState={{ selected: selectedIndex === index }}
-              onPress={() => selectDemo(index)}
+              accessibilityLabel={
+                isDark ? "Switch to light mode" : "Switch to dark mode"
+              }
+              onPress={toggleTheme}
               style={[
-                styles.button,
-                {
-                  backgroundColor:
-                    selectedIndex === index ? colors.text : colors.surface,
-                  borderColor: colors.border,
-                },
+                styles.themeButton,
+                { backgroundColor: colors.surface, borderColor: colors.border },
               ]}
             >
-              <Text
-                style={[
-                  styles.buttonText,
-                  {
-                    color:
-                      selectedIndex === index ? colors.surface : colors.text,
-                  },
-                ]}
+              <Animated.View
+                style={{
+                  transform: [
+                    {
+                      rotate: rotation.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ["0deg", "360deg"],
+                      }),
+                    },
+                  ],
+                }}
               >
-                {demo.title}
-              </Text>
+                <Feather
+                  name={isDark ? "sun" : "moon"}
+                  size={24}
+                  color={colors.text}
+                />
+              </Animated.View>
             </Pressable>
-          ))}
-        </View>
-        <View style={styles.row}>
-          <Pressable
-            accessibilityRole="button"
-            onPress={playAnimation}
-            style={[styles.button, { borderColor: colors.border }]}
-          >
-            <Feather name="play" size={20} color={colors.text} />
-            <Text style={[styles.buttonText, { color: colors.text }]}>
-              Play
-            </Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            onPress={restartAnimation}
-            style={[styles.button, { borderColor: colors.border }]}
-          >
-            <Feather name="rotate-ccw" size={20} color={colors.text} />
-            <Text style={[styles.buttonText, { color: colors.text }]}>
-              Restart
-            </Text>
-          </Pressable>
-        </View>
-      </View>
-    </SafeAreaView>
+          </View>
+          <View style={styles.stage}>
+            <View key={selectedDemo.id} style={styles.preview}>
+              <Demo colors={colors} progress={progress} />
+            </View>
+          </View>
+
+          <View style={[styles.controls, { backgroundColor: colors.surface }]}>
+            <View style={styles.row}>
+              {demos.map((demo, index) => (
+                <Pressable
+                  key={demo.id}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: selectedIndex === index }}
+                  onPress={() => selectDemo(index)}
+                  style={[
+                    styles.button,
+                    {
+                      backgroundColor:
+                        selectedIndex === index ? colors.text : colors.surface,
+                      borderColor: colors.border,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.buttonText,
+                      {
+                        color:
+                          selectedIndex === index
+                            ? colors.surface
+                            : colors.text,
+                      },
+                    ]}
+                  >
+                    {demo.title}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            <View style={styles.row}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={playAnimation}
+                style={[styles.button, { borderColor: colors.border }]}
+              >
+                <Feather name="play" size={20} color={colors.text} />
+                <Text style={[styles.buttonText, { color: colors.text }]}>
+                  Play
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                onPress={resetAnimation}
+                style={[styles.button, { borderColor: colors.border }]}
+              >
+                <Feather name="rotate-ccw" size={20} color={colors.text} />
+                <Text style={[styles.buttonText, { color: colors.text }]}>
+                  Reset
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </SafeAreaView>
+      </Animated.View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  backdrop: { flex: 1, backgroundColor: "#121212" },
   screen: { flex: 1 },
   header: {
-    alignItems: "flex-end",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: spacing.large,
     paddingTop: spacing.small,
   },

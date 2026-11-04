@@ -2,13 +2,13 @@ import type { ComponentType } from "react";
 import { MysteryBoxDemo } from "./mystery-box/MysteryBoxDemo";
 import { SurpriseCardDemo } from "./surprise-card/SurpriseCardDemo";
 
-import type { ThemeColors } from "../theme/tokens";
+import type { DemoProps } from "./types";
 
 type Demo = {
   id: string;
   title: string;
   description: string;
-  Component: ComponentType<{ colors: ThemeColors }>;
+  Component: ComponentType<DemoProps>;
 };
 
 export const demos: readonly Demo[] = [
