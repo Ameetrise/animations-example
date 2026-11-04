@@ -1,7 +1,6 @@
 import { PaperPlane } from "./PaperPlane";
 import { CardBackDesign } from "./CardBackDesign";
-import type { ComponentRef } from "react";
-import { useEffect, useRef, type RefObject } from "react";
+import { type ComponentRef, useEffect, useRef, type RefObject } from "react";
 import { scheduleOnRN } from "react-native-worklets";
 import Feather from "@expo/vector-icons/Feather";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";

@@ -9,9 +9,14 @@ export function MysteryBox() {
       style={styles.scene}
     >
       <View style={styles.shadow} />
+      <View style={styles.contactShadow} />
       <View style={styles.body}>
+        <View style={styles.frontLight} />
         <View style={styles.side} />
-        <View style={styles.bodyRibbon} />
+        <View style={styles.bodyRibbon}>
+          <View style={styles.ribbonShine} />
+        </View>
+        <View style={styles.lidShadow} />
         <View style={styles.bottomEdge} />
         <View style={styles.label}>
           <Feather name="package" size={18} color="#EACB8B" />
@@ -21,11 +26,17 @@ export function MysteryBox() {
       </View>
       <View style={styles.lid}>
         <View style={styles.lidTop} />
-        <View style={styles.topRibbon} />
+        <View style={styles.topEdge} />
+        <View style={styles.topRibbon}>
+          <View style={styles.ribbonShine} />
+        </View>
         <View style={styles.lidFront}>
           <View style={styles.lidRibbon} />
           <View style={styles.lidHighlight} />
+          <View style={styles.lidSide} />
         </View>
+        <View style={[styles.ribbonTail, styles.tailLeft]} />
+        <View style={[styles.ribbonTail, styles.tailRight]} />
         <View style={[styles.bowLoop, styles.bowLeft]} />
         <View style={[styles.bowLoop, styles.bowRight]} />
         <View style={styles.knot} />
@@ -53,6 +64,16 @@ const styles = StyleSheet.create({
     borderRadius: 120,
     backgroundColor: "#00000016",
   },
+  contactShadow: {
+    position: "absolute",
+    bottom: 15,
+    left: 43,
+    width: 196,
+    height: 14,
+    borderRadius: 100,
+    backgroundColor: "#00000030",
+    boxShadow: "0px 4px 10px #00000030",
+  },
   body: {
     position: "absolute",
     top: 92,
@@ -60,11 +81,30 @@ const styles = StyleSheet.create({
     width: 210,
     height: 142,
     backgroundColor: "#24384B",
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
+    borderBottomLeftRadius: 5,
+    borderBottomRightRadius: 5,
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "#3D5267",
+  },
+  frontLight: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    bottom: 7,
+    width: 65,
+    backgroundColor: "#FFFFFF05",
+    borderLeftWidth: 2,
+    borderLeftColor: "#FFFFFF20",
+  },
+  lidShadow: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 9,
+    backgroundColor: "#00000028",
+    boxShadow: "0px 4px 8px #00000020",
   },
   side: {
     position: "absolute",
@@ -87,6 +127,16 @@ const styles = StyleSheet.create({
     borderRightWidth: 2,
     borderColor: "#F0D18F",
   },
+  ribbonShine: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 5,
+    width: 7,
+    backgroundColor: "#FFF0C444",
+    borderRightWidth: 1,
+    borderRightColor: "#FFF3D655",
+  },
   bottomEdge: {
     position: "absolute",
     bottom: 0,
@@ -101,13 +151,14 @@ const styles = StyleSheet.create({
     left: 33,
     width: 124,
     height: 74,
-    borderRadius: 8,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: "#D5B879",
     backgroundColor: "#1C2E3F",
     alignItems: "center",
     justifyContent: "center",
     gap: 5,
+    boxShadow: "0px 3px 5px #00000040",
   },
   brand: {
     color: "#F5DFB0",
@@ -151,6 +202,14 @@ const styles = StyleSheet.create({
     borderRightWidth: 2,
     borderColor: "#F9E4AF",
   },
+  topEdge: {
+    position: "absolute",
+    top: 0,
+    left: 18,
+    right: 18,
+    height: 1,
+    backgroundColor: "#B3C6D180",
+  },
   lidFront: {
     position: "absolute",
     top: 42,
@@ -181,6 +240,42 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: "#FFFFFF30",
   },
+  lidSide: {
+    position: "absolute",
+    top: 2,
+    right: 0,
+    bottom: 0,
+    width: 24,
+    backgroundColor: "#17273788",
+    borderLeftWidth: 1,
+    borderLeftColor: "#7F98AA40",
+  },
+  ribbonTail: {
+    position: "absolute",
+    top: 14,
+    width: 16,
+    height: 30,
+    backgroundColor: "#D0A45B",
+    borderLeftWidth: 2,
+    borderLeftColor: "#F7DFA2",
+    borderBottomRightRadius: 7,
+  },
+  tailLeft: {
+    left: 91,
+    transform: [
+      {
+        rotate: "28deg",
+      },
+    ],
+  },
+  tailRight: {
+    left: 121,
+    transform: [
+      {
+        rotate: "-24deg",
+      },
+    ],
+  },
   bowLoop: {
     position: "absolute",
     top: -6,
@@ -188,8 +283,11 @@ const styles = StyleSheet.create({
     height: 27,
     borderWidth: 7,
     borderColor: "#E6C47E",
+    borderTopColor: "#FFE7AF",
+    borderBottomColor: "#AC7C38",
     backgroundColor: "#31495C",
     borderRadius: 20,
+    boxShadow: "0px 3px 3px #00000030",
   },
   bowLeft: {
     left: 68,
@@ -217,6 +315,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#EFD495",
     borderWidth: 1,
     borderColor: "#B78A43",
+    borderTopColor: "#FFF0C9",
+    borderBottomWidth: 3,
+    boxShadow: "0px 2px 3px #00000030",
   },
   tagString: {
     position: "absolute",
@@ -240,6 +341,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: "#F3DEAC",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#FFF0CD",
+    borderBottomColor: "#C5A36B",
+    boxShadow: "2px 4px 4px #00000038",
     transform: [
       {
         rotate: "-12deg",

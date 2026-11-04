@@ -1,5 +1,4 @@
-import type { ComponentRef } from "react";
-import type { RefObject } from "react";
+import type { ComponentRef, RefObject } from "react";
 import type { View } from "react-native";
 import type { SharedValue } from "react-native-reanimated";
 import type { ThemeColors } from "../theme/tokens";
