@@ -1,3 +1,4 @@
+import { deckPose } from "./deckMotion";
 import { palette } from "../../theme/colors";
 import { PaperPlane } from "./PaperPlane";
 import { CardBackDesign } from "./CardBackDesign";
@@ -10,8 +11,8 @@ import Animated, {
   cancelAnimation,
   Easing,
   useSharedValue,
-  withSequence,
   withSpring,
+  withSequence,
   withTiming,
   useAnimatedStyle,
   type SharedValue,
@@ -44,7 +45,6 @@ export function PlayingCard({
   onClaimMoney,
   width,
   selected,
-  hasSelection,
   shuffle,
   disabled,
   product,
@@ -54,27 +54,14 @@ export function PlayingCard({
 }: Props) {
   const cardRef = useRef<ComponentRef<typeof View>>(null);
   const sent = useRef(false);
-  const emphasis = useSharedValue(1);
   const selection = useSharedValue(selected ? 1 : 0);
-
-  useEffect(() => {
-    emphasis.set(
-      withSpring(selected ? 1.28 : hasSelection ? 0.82 : 1, {
-        damping: 18,
-        stiffness: 180,
-      }),
-    );
-    return () => cancelAnimation(emphasis);
-  }, [emphasis, selected, hasSelection]);
-
   useEffect(() => {
     selection.value = withSpring(selected ? 1 : 0, {
-      damping: 18,
-      stiffness: 180,
+      damping: 16,
+      stiffness: 190,
     });
     return () => cancelAnimation(selection);
   }, [selected, selection]);
-
   const flight = useSharedValue(0);
   const flightX = useSharedValue(0);
   const flightY = useSharedValue(0);
@@ -89,7 +76,7 @@ export function PlayingCard({
 
   function handlePress() {
     if (progress.value < 1) {
-      onPress();
+      if (progress.value === 0) onPress();
       return;
     }
     if (selected && !sent.current && product.icon === "dollar-sign") {
@@ -166,88 +153,57 @@ export function PlayingCard({
         ],
       };
     }
-    const move = Math.min(progress.value / 0.3, 1);
-    const wave = Math.sin(float.value + index * 2.1);
-    const invitation = Math.max(0, wave);
-    if (shuffle.value < 1) {
-      const offset = (index - 1) * (width + 9);
-      const side = index === 1 ? -1 : 1;
-      return {
-        opacity: 1,
-        zIndex: index,
-        transform: [
-          {
-            translateX: interpolate(
-              shuffle.value,
-              [0, 0.2, 0.4, 0.6, 0.8, 1],
-              [
-                offset,
-                (index - 1) * 5,
-                [-0.9, 0.75, 0][index] * width,
-                [0.75, 0, -0.9][index] * width,
-                (index - 1) * 5,
-                offset,
-              ],
-            ),
-          },
-          {
-            translateY: interpolate(
-              shuffle.value,
-              [0, 0.2, 0.4, 0.6, 0.8, 1],
-              [
-                Math.abs(index - 1) * 10,
-                (index - 1) * 4,
-                (index - 1) * -18,
-                (index - 1) * 18,
-                (index - 1) * 4,
-                Math.abs(index - 1) * 10 - wave * 5 - invitation * 7,
-              ],
-            ),
-          },
-          {
-            rotate: `${interpolate(shuffle.value, [0, 0.2, 0.4, 0.6, 0.8, 1], [(index - 1) * 9, 0, side * -8, side * 8, 0, (index - 1) * 9 + wave * 3])}deg`,
-          },
-          {
-            scale: (1 + invitation * 0.025) / 1.75,
-          },
-        ],
-      };
-    }
-    const wobble = interpolate(
-      progress.value,
-      [0, 0.16, 0.22, 0.28, 0.34, 1],
-      [0, 0, -7, 7, 0, 0],
+    const pose = deckPose(shuffle.value, index + 7, width * 1.35);
+    const deal = interpolate(
+      shuffle.value,
+      [0.75 + index * 0.045, 0.9 + index * 0.045],
+      [0, 1],
       "clamp",
     );
+    const settled = 1 - Math.pow(1 - deal, 3);
+    const move = interpolate(progress.value, [0, 0.3], [0, 1], "clamp");
+    const wave = Math.sin(float.value + index * 1.8) * 2;
+    const idleX = (index - 1) * (width + 14);
+    const idleY = Math.abs(index - 1) * 9 - selection.value * 18 + wave;
+    const lift = interpolate(
+      progress.value,
+      [0, 0.3, 0.75, 1],
+      [0, -28, -18, -12],
+      "clamp",
+    );
+    const idleScale = (1 + selection.value * 0.12) / 1.75;
     return {
       opacity: selected ? 1 : 1 - move,
-      zIndex: selected ? 2 : 1,
+      zIndex: selected ? 20 : index + 7,
       transform: [
+        { perspective: 900 },
         {
           translateX:
-            (index - 1) * (width + 9) * (selected ? 1 - move : 1 + move * 0.3),
+            (pose.x * (1 - settled) + idleX * settled) *
+            (selected ? 1 - move : 1 + move * 0.2),
         },
         {
           translateY:
-            Math.abs(index - 1) * 10 * (1 - selection.value) -
-            12 * selection.value -
-            (wave * 5 + invitation * 7) * (1 - move),
+            (pose.y * (1 - settled) +
+              idleY * settled -
+              Math.sin(deal * Math.PI) * 30) *
+              (1 - move) +
+            lift,
         },
         {
-          rotate: `${((index - 1) * 9 + wave * 3) * (1 - move) + (selected ? wobble : 0)}deg`,
+          rotateZ: `${(pose.rotate * (1 - settled) + (index - 1) * 6 * settled) * (1 - move) + (selected ? interpolate(progress.value, [0, 0.3, 0.75, 1], [0, -8, 3, 0], "clamp") : 0)}deg`,
         },
+        { rotateX: `${pose.tilt * (1 - settled) * (1 - move)}deg` },
         {
           scale:
-            (emphasis.value * (1 - move) +
-              (selected ? 1.75 : 0.7) * move +
-              invitation * 0.015 * (1 - move)) /
-            1.75,
+            ((1.35 / 1.75) * (1 - settled) + idleScale * settled) * (1 - move) +
+            move,
         },
       ],
     };
   });
   const frontStyle = useAnimatedStyle(() => ({
-    opacity: progress.value < 0.55 ? 1 : 0,
+    opacity: !selected || progress.value < 0.55 ? 1 : 0,
     transform: [
       {
         perspective: 900,
@@ -258,7 +214,7 @@ export function PlayingCard({
     ],
   }));
   const backStyle = useAnimatedStyle(() => ({
-    opacity: progress.value >= 0.55 ? 1 : 0,
+    opacity: selected && progress.value >= 0.55 ? 1 : 0,
     transform:
       progress.value >= 0.75
         ? []
@@ -297,8 +253,7 @@ export function PlayingCard({
     transform: [
       {
         translateX:
-          ((float.value / (Math.PI * 2) + index / 3) % 1) * renderWidth * 3 -
-          renderWidth,
+          ((float.value / (Math.PI * 2)) % 1) * renderWidth * 3 - renderWidth,
       },
       {
         rotate: "25deg",
@@ -350,8 +305,8 @@ export function PlayingCard({
         accessibilityLabel={
           selected
             ? product.icon === "dollar-sign"
-              ? "Selected card. After revealing, tap to collect your cash reward"
-              : "Selected card. After revealing, tap to add to cart"
+              ? "Selected card. Tap again to reveal. After revealing, tap to collect your cash reward"
+              : "Selected card. Tap again to reveal. After revealing, tap to add to cart"
             : `Pick card ${index + 1}`
         }
         accessibilityState={{
@@ -364,9 +319,7 @@ export function PlayingCard({
             styles.face,
             styles.front,
             {
-              borderColor: selected
-                ? palette.cardSelectedBorder
-                : palette.cardBorder,
+              borderColor: selected ? palette.gold : "#fff7e6",
             },
             frontStyle,
           ]}
@@ -530,7 +483,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: 21,
+    borderRadius: 12,
     borderWidth: 3,
     alignItems: "center",
     justifyContent: "center",
@@ -538,7 +491,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   front: {
-    backgroundColor: palette.playingCardFrontBackgroundColor,
+    backgroundColor: "#b62c20",
   },
   back: {
     backgroundColor: palette.playingCardBackBackgroundColor,

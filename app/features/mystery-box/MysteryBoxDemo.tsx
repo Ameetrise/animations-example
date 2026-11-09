@@ -65,8 +65,8 @@ export function MysteryBoxDemo({
         {won
           ? "You won AirPods Max!"
           : hasPlayed
-            ? "Something special is inside…"
-            : "Good things come boxed."}
+            ? "A little spell. A big surprise…"
+            : "A little magic, just for you."}
       </Animated.Text>
       <View
         style={{
@@ -108,7 +108,7 @@ export function MysteryBoxDemo({
           ? "Your winning pick. Tap to add to your cart."
           : hasPlayed
             ? "Wait for it…"
-            : "Tap the box. Let the magic out."}
+            : "Tap the magic wand to break the spell."}
       </Text>
     </View>
   );

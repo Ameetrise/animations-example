@@ -7,6 +7,7 @@ import Animated, {
   Easing,
   interpolate,
   useAnimatedStyle,
+  useDerivedValue,
   useReducedMotion,
   useSharedValue,
   withRepeat,
@@ -14,6 +15,7 @@ import Animated, {
   type SharedValue,
 } from "react-native-reanimated";
 import type { DemoProps } from "../types";
+import { MagicWand } from "./MagicWand";
 import { BoxPrize } from "./BoxPrize";
 import { RevealSpark } from "./RevealSpark";
 import { ShootingStar } from "./ShootingStar";
@@ -33,13 +35,16 @@ type Props = Pick<DemoProps, "cartRef" | "onAddedToCart"> & {
 };
 
 export function MysteryBox({
-  progress,
+  progress: revealProgress,
   onOpen,
   opened,
   scale,
   cartRef,
   onAddedToCart,
 }: Props) {
+  const progress = useDerivedValue(() =>
+    interpolate(revealProgress.value, [0.2, 1], [0, 1], "clamp"),
+  );
   const { width } = useWindowDimensions();
   const throwDistance = (width + 300) / scale;
   const idle = useSharedValue(0);
@@ -66,30 +71,48 @@ export function MysteryBox({
     return () => cancelAnimation(idle);
   }, [idle, opened, reduceMotion]);
 
-  const boxStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateY: Math.sin(idle.value) * 5,
-      },
-      {
-        rotate: `${Math.sin(idle.value * 2) * 1.5 + (reduceMotion ? 0 : Math.sin(progress.value * 150) * interpolate(progress.value, [0, 0.1, 0.22], [0, 3, 0], "clamp"))}deg`,
-      },
-    ],
-  }));
+  const boxStyle = useAnimatedStyle(() => {
+    const tension = interpolate(
+      progress.value,
+      [0, 0.12, 0.23, 0.38],
+      [0, 1, 1, 0],
+      "clamp",
+    );
+    const recoil = interpolate(
+      progress.value,
+      [0.34, 0.43, 0.5, 0.58],
+      [0, 1, -0.35, 0],
+      "clamp",
+    );
+    return {
+      transform: [
+        {
+          translateY: reduceMotion ? 0 : Math.sin(idle.value) * 4 + recoil * 7,
+        },
+        {
+          rotate: `${reduceMotion ? 0 : Math.sin(idle.value * 2) * 1.2 + Math.sin(progress.value * 190) * tension * 2.4}deg`,
+        },
+        { scaleX: reduceMotion ? 1 : 1 + recoil * 0.025 },
+        { scaleY: reduceMotion ? 1 : 1 - recoil * 0.035 },
+      ],
+    };
+  });
   const lidStyle = useAnimatedStyle(() => ({
-    opacity: reduceMotion
-      ? interpolate(progress.value, [0, 0.4], [1, 0], "clamp")
-      : progress.value < 0.8
-        ? 1
-        : 0,
+    opacity: interpolate(
+      progress.value,
+      reduceMotion ? [0.25, 0.45] : [0.55, 0.68],
+      [1, 0],
+      "clamp",
+    ),
     transform: [
+      { perspective: 700 },
       {
         translateY: reduceMotion
           ? 0
           : interpolate(
               progress.value,
-              [0, 0.18, 0.45, 0.8],
-              [0, 5, -110, -40],
+              [0, 0.12, 0.18, 0.23, 0.28, 0.34, 0.43, 0.55, 0.68],
+              [0, -3, 1, -8, -5, -18, -105, -145, -80],
               "clamp",
             ),
       },
@@ -98,15 +121,60 @@ export function MysteryBox({
           ? 0
           : interpolate(
               progress.value,
-              [0, 0.18, 0.8],
-              [0, -8, throwDistance],
+              [0, 0.34, 0.43, 0.55, 0.68],
+              [0, 0, -14, 85, throwDistance * 0.65],
               "clamp",
             ),
       },
       {
-        rotate: reduceMotion
+        rotateZ: reduceMotion
           ? "0deg"
-          : `${interpolate(progress.value, [0, 0.18, 0.8], [0, -4, 160], "clamp")}deg`,
+          : `${interpolate(
+              progress.value,
+              [0, 0.18, 0.23, 0.28, 0.34, 0.43, 0.68],
+              [0, -2, 3, -3, 0, -16, 95],
+              "clamp",
+            )}deg`,
+      },
+      {
+        rotateX: reduceMotion
+          ? "0deg"
+          : `${interpolate(progress.value, [0.34, 0.48, 0.68], [0, -28, 30], "clamp")}deg`,
+      },
+    ],
+  }));
+  const seamStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      progress.value,
+      [0, 0.16, 0.34, 0.5, 0.85, 1],
+      [0, 0.3, 1, 0.85, 0.4, 0.2],
+      "clamp",
+    ),
+    transform: [
+      {
+        scaleX: interpolate(
+          progress.value,
+          [0, 0.34, 1],
+          [0.65, 1, 1],
+          "clamp",
+        ),
+      },
+    ],
+  }));
+  const shadowStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.value, [0, 0.4, 0.65, 1], [0.8, 1, 0.6, 0.7]),
+    transform: [
+      {
+        scaleX: reduceMotion
+          ? 1
+          : interpolate(progress.value, [0, 0.4, 0.55, 1], [1, 1.08, 0.96, 1]),
+      },
+    ],
+  }));
+  const tagStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        rotate: `${reduceMotion ? 0 : Math.sin(progress.value * 48) * interpolate(progress.value, [0, 0.35, 0.65, 1], [0, 14, 8, 0], "clamp")}deg`,
       },
     ],
   }));
@@ -158,7 +226,7 @@ export function MysteryBox({
     ],
   }));
   const insideStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(progress.value, [0, 0.2, 0.4], [0, 0, 1], "clamp"),
+    opacity: interpolate(progress.value, [0, 0.16, 0.3], [0, 0, 1], "clamp"),
   }));
 
   return (
@@ -168,12 +236,6 @@ export function MysteryBox({
         [0, 1, 2, 3, 4].map((index) => (
           <ShootingStar key={index} index={index} />
         ))}
-      <BoxPrize
-        progress={progress}
-        scale={scale}
-        cartRef={cartRef}
-        onAddedToCart={onAddedToCart}
-      />
       <Animated.View pointerEvents="box-none" style={[styles.scene, boxStyle]}>
         <Animated.View pointerEvents="none" style={[styles.glow, glowStyle]} />
         <Animated.View
@@ -184,12 +246,27 @@ export function MysteryBox({
           pointerEvents="none"
           style={[styles.lightBeam, lightStyle]}
         />
-        <View style={styles.shadow} />
+        <Animated.View style={[styles.shadow, shadowStyle]} />
         <View style={styles.contactShadow} />
         <Animated.View style={[styles.interior, insideStyle]}>
+          <View style={styles.rimShape} />
+          <View style={styles.cavityShape} />
+          <View style={styles.backWall} />
           <View style={styles.innerFloor} />
+          <View style={styles.leftInnerWall} />
+          <View style={styles.rightInnerWall} />
           <View style={styles.innerFront} />
         </Animated.View>
+        <BoxPrize
+          progress={progress}
+          scale={scale}
+          cartRef={cartRef}
+          onAddedToCart={onAddedToCart}
+        />
+        <Animated.View
+          pointerEvents="none"
+          style={[styles.openingRim, seamStyle]}
+        />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Open mystery box"
@@ -198,6 +275,35 @@ export function MysteryBox({
           style={styles.body}
         >
           <View style={styles.frontLight} />
+          <View pointerEvents="none" style={styles.foilFrame} />
+          {[0, 1, 2, 3].map((corner) => (
+            <View
+              key={corner}
+              style={[
+                styles.cornerCap,
+                {
+                  left: corner % 2 === 0 ? 5 : undefined,
+                  right: corner % 2 ? 5 : undefined,
+                  top: corner < 2 ? 5 : undefined,
+                  bottom: corner >= 2 ? 10 : undefined,
+                },
+              ]}
+            />
+          ))}
+          {[0, 1, 2, 3, 4, 5].map((mark) => (
+            <Text
+              key={mark}
+              style={[
+                styles.constellation,
+                {
+                  left: 12 + (mark % 3) * 76,
+                  top: 20 + Math.floor(mark / 3) * 87,
+                },
+              ]}
+            >
+              ✦
+            </Text>
+          ))}
           <View style={styles.side} />
           <View style={styles.bodyRibbon}>
             <View style={styles.ribbonShine} />
@@ -205,9 +311,9 @@ export function MysteryBox({
           <View style={styles.lidShadow} />
           <View style={styles.bottomEdge} />
           <View style={styles.label}>
-            <Feather name="package" size={18} color={palette.boxGold} />
+            <Feather name="moon" size={18} color={palette.boxGold} />
             <Text style={styles.brand}>{brandName}</Text>
-            <Text style={styles.caption}>SOMETHING SPECIAL</Text>
+            <Text style={styles.caption}>SEALED WITH MAGIC</Text>
           </View>
         </Pressable>
         <Animated.View pointerEvents="none" style={[styles.lid, lidStyle]}>
@@ -236,17 +342,58 @@ export function MysteryBox({
               <RevealSpark key={index} index={index} progress={progress} />
             ),
           )}
-        <View style={styles.tagString} />
-        <View style={styles.tag}>
-          <View style={styles.tagHole} />
-          <Text style={styles.question}>?</Text>
-        </View>
+        <Animated.View
+          pointerEvents="none"
+          style={[StyleSheet.absoluteFill, tagStyle]}
+        >
+          <View style={styles.tagString} />
+          <View style={styles.tag}>
+            <View style={styles.tagHole} />
+            <Text style={styles.question}>?</Text>
+          </View>
+        </Animated.View>
       </Animated.View>
+      <MagicWand
+        progress={revealProgress}
+        idle={idle}
+        opened={opened}
+        onCast={onOpen}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  foilFrame: {
+    position: "absolute",
+    top: 7,
+    left: 7,
+    right: 7,
+    bottom: 12,
+    borderWidth: 1,
+    borderColor: "#d9b77b66",
+    borderRadius: 4,
+  },
+  cornerCap: {
+    position: "absolute",
+    width: 13,
+    height: 13,
+    borderWidth: 2,
+    borderColor: "#eacb8b",
+    borderRadius: 3,
+    backgroundColor: "#ba925333",
+  },
+  constellation: { position: "absolute", fontSize: 11, color: "#eacb8b99" },
+  openingRim: {
+    position: "absolute",
+    top: 87,
+    left: 37,
+    width: 206,
+    height: 6,
+    borderRadius: 2,
+    backgroundColor: palette.sparkleGold,
+    boxShadow: "0px -4px 16px rgba(255, 211, 128, 0.8)",
+  },
   stage: {
     width: 280,
     height: 420,
@@ -288,35 +435,87 @@ const styles = StyleSheet.create({
   interior: {
     position: "absolute",
     left: 35,
-    top: 49,
+    top: 27,
     width: 210,
-    height: 47,
-    backgroundColor: palette.mysteryBoxInteriorBackgroundColor,
-    borderWidth: 5,
-    borderTopColor: palette.mysteryBoxInteriorBorderTopColor,
-    borderLeftColor: palette.mysteryBoxInteriorBorderLeftColor,
-    borderRightColor: palette.mysteryBoxInteriorBorderRightColor,
-    borderBottomColor: palette.mysteryBoxInteriorBorderBottomColor,
-    borderRadius: 5,
-    overflow: "hidden",
+    height: 65,
+  },
+  rimShape: {
+    position: "absolute",
+    width: 210,
+    height: 0,
+    borderLeftWidth: 18,
+    borderRightWidth: 18,
+    borderBottomWidth: 65,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderBottomColor: "#a18467",
+  },
+  cavityShape: {
+    position: "absolute",
+    left: 6,
+    top: 5,
+    width: 198,
+    height: 0,
+    borderLeftWidth: 15,
+    borderRightWidth: 15,
+    borderBottomWidth: 56,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderBottomColor: "#100e1d",
+  },
+  backWall: {
+    position: "absolute",
+    left: 22,
+    right: 22,
+    top: 5,
+    height: 24,
+    backgroundColor: "#362b46",
+    borderTopWidth: 2,
+    borderTopColor: "#dcc3a0",
+    borderBottomWidth: 1,
+    borderBottomColor: "#594666",
   },
   innerFloor: {
     position: "absolute",
-    left: 14,
-    right: 14,
-    top: 13,
-    bottom: 0,
-    backgroundColor: palette.mysteryBoxInnerFloorBackgroundColor,
+    left: 22,
+    right: 22,
+    top: 29,
+    height: 25,
+    backgroundColor: "#161222",
     borderTopWidth: 1,
-    borderTopColor: palette.mysteryBoxInnerFloorBorderTopColor,
+    borderTopColor: "#08070e",
+  },
+  leftInnerWall: {
+    position: "absolute",
+    left: 8,
+    top: 7,
+    width: 0,
+    height: 0,
+    borderTopWidth: 48,
+    borderRightWidth: 15,
+    borderTopColor: "transparent",
+    borderRightColor: "#55405e",
+  },
+  rightInnerWall: {
+    position: "absolute",
+    right: 8,
+    top: 7,
+    width: 0,
+    height: 0,
+    borderTopWidth: 48,
+    borderLeftWidth: 15,
+    borderTopColor: "transparent",
+    borderLeftColor: "#2c223b",
   },
   innerFront: {
     position: "absolute",
-    left: 0,
-    right: 0,
+    left: 4,
+    right: 4,
     bottom: 0,
     height: 5,
-    backgroundColor: palette.mysteryBoxInnerFrontBackgroundColor,
+    backgroundColor: "#c3a578",
+    borderTopWidth: 1,
+    borderTopColor: "#ffe0a5",
   },
   scene: {
     width: 280,
@@ -347,7 +546,7 @@ const styles = StyleSheet.create({
     left: 35,
     width: 210,
     height: 142,
-    backgroundColor: palette.mysteryBoxBodyBackgroundColor,
+    backgroundColor: "#29243f",
     borderBottomLeftRadius: 5,
     borderBottomRightRadius: 5,
     overflow: "hidden",
@@ -379,7 +578,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 24,
-    backgroundColor: palette.mysteryBoxSideBackgroundColor,
+    backgroundColor: "#18152b",
     borderLeftWidth: 1,
     borderLeftColor: palette.mysteryBoxSideBorderLeftColor,
   },
@@ -421,7 +620,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     borderWidth: 1,
     borderColor: palette.mysteryBoxLabelBorderColor,
-    backgroundColor: palette.mysteryBoxLabelBackgroundColor,
+    backgroundColor: "#201b33",
     alignItems: "center",
     justifyContent: "center",
     gap: 5,
@@ -456,7 +655,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 42,
     borderLeftColor: palette.transparent,
     borderRightColor: palette.transparent,
-    borderBottomColor: palette.mysteryBoxLidTopBorderBottomColor,
+    borderBottomColor: "#51415f",
   },
   topRibbon: {
     position: "absolute",
@@ -483,7 +682,7 @@ const styles = StyleSheet.create({
     width: 230,
     height: 30,
     borderRadius: 5,
-    backgroundColor: palette.mysteryBoxLidFrontBackgroundColor,
+    backgroundColor: "#392e4c",
     borderBottomWidth: 5,
     borderBottomColor: palette.mysteryBoxLidFrontBorderBottomColor,
     overflow: "hidden",

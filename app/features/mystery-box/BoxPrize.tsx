@@ -83,7 +83,7 @@ export function BoxPrize({ progress, cartRef, onAddedToCart, scale }: Props) {
     const travel = interpolate(flight.value, [0, 0.2, 1], [0, -0.06, 1]);
     return {
       opacity:
-        interpolate(progress.value, [0.45, 0.52], [0, 1], "clamp") *
+        interpolate(progress.value, [0.42, 0.46], [0, 1], "clamp") *
         interpolate(flight.value, [0, 0.92, 1], [1, 1, 0]),
       transform: [
         {
@@ -95,8 +95,8 @@ export function BoxPrize({ progress, cartRef, onAddedToCart, scale }: Props) {
               ? 0
               : interpolate(
                   progress.value,
-                  [0.45, 0.95, 1],
-                  [252, 0, 0],
+                  [0.42, 0.52, 0.65, 0.84, 0.92, 1],
+                  [252, 205, 125, -8, 3, 0],
                   "clamp",
                 )) +
             (reduceMotion
@@ -105,7 +105,15 @@ export function BoxPrize({ progress, cartRef, onAddedToCart, scale }: Props) {
                 Math.sin(Math.max(0, travel) * Math.PI) * 45),
         },
         {
-          scale: interpolate(flight.value, [0, 0.2, 1], [1, 1.06, 0.12]),
+          scale:
+            (reduceMotion
+              ? 1
+              : interpolate(
+                  progress.value,
+                  [0.42, 0.65, 0.84, 1],
+                  [0.76, 0.87, 1.03, 1],
+                  "clamp",
+                )) * interpolate(flight.value, [0, 0.2, 1], [1, 1.06, 0.12]),
         },
       ],
     };
@@ -119,12 +127,12 @@ export function BoxPrize({ progress, cartRef, onAddedToCart, scale }: Props) {
       {
         rotateY: reduceMotion
           ? "0deg"
-          : `${interpolate(progress.value, [0.5, 0.92, 1], [-65, 12, 0], "clamp")}deg`,
+          : `${interpolate(progress.value, [0.42, 0.62, 0.84, 1], [-28, -18, 8, 0], "clamp")}deg`,
       },
       {
         rotateZ: reduceMotion
           ? "0deg"
-          : `${interpolate(progress.value, [0.5, 0.9, 1], [-12, 4, 0], "clamp")}deg`,
+          : `${interpolate(progress.value, [0.42, 0.65, 0.84, 1], [-8, -5, 4, 0], "clamp")}deg`,
       },
     ],
   }));
@@ -168,7 +176,9 @@ export function BoxPrize({ progress, cartRef, onAddedToCart, scale }: Props) {
 const styles = StyleSheet.create({
   window: {
     position: "absolute",
-    top: 0,
+    // Scene origin is 160px below the stage top. The clipping plane
+    // ends exactly at the front lip (scene y=92), not behind the interior.
+    top: -160,
     left: 35,
     width: 210,
     height: 252,

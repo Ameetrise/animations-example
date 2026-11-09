@@ -128,21 +128,28 @@ export function ShowcaseScreen({ colors, isDark, onToggleTheme }: Props) {
             }),
           )
         : withSequence(
-            withTiming(0.18, {
-              duration: 900,
+            withTiming(0.2, {
+              duration: 2400,
+              easing: Easing.linear,
+            }),
+            withTiming(0.344, {
+              duration: 700,
               easing: Easing.inOut(Easing.quad),
             }),
-            withTiming(0.18, {
-              duration: 350,
+            withTiming(0.344, { duration: 180 }),
+            withTiming(0.472, {
+              duration: 520,
+              easing: Easing.inOut(Easing.quad),
             }),
-            withTiming(0.45, {
-              duration: 900,
-              easing: Easing.in(Easing.cubic),
+            withTiming(0.584, {
+              duration: 420,
+              easing: Easing.out(Easing.cubic),
             }),
-            withTiming(1, {
-              duration: 2600,
-              easing: Easing.out(Easing.quad),
+            withTiming(0.872, {
+              duration: 1200,
+              easing: Easing.inOut(Easing.cubic),
             }),
+            withTiming(1, { duration: 600, easing: Easing.out(Easing.quad) }),
           );
   }
 

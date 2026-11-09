@@ -19,6 +19,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import type { DemoProps } from "../types";
+import { DeckStack } from "./DeckStack";
 import { DepositAnimation } from "./DepositAnimation";
 import { PlayingCard } from "./PlayingCard";
 import { ShiningStar } from "./ShiningStar";
@@ -49,6 +50,8 @@ export function SurpriseCardDemo({
   progress,
   selectedCard,
   onSelectCard,
+  onReveal,
+  hasPlayed,
 }: DemoProps) {
   const [claimingMoney, setClaimingMoney] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
@@ -61,28 +64,29 @@ export function SurpriseCardDemo({
   const { width } = useWindowDimensions();
   const compact = availableHeight < 460;
   const tableHeight = Math.max(200, availableHeight - (compact ? 166 : 206));
-  const cardWidth = Math.min(96, (width - 80) / 3, (tableHeight - 72) / 2.8);
+  const cardWidth = Math.min(110, (width - 72) / 3.6, (tableHeight - 50) / 2.8);
   const float = useSharedValue(0);
   const reduceMotion = useReducedMotion();
   const shuffle = useSharedValue(reduceMotion ? 1 : 0);
   const [isShuffling, setIsShuffling] = useState(!reduceMotion);
 
   useEffect(() => {
-    const step = {
-      duration: 700,
-      easing: Easing.inOut(Easing.sin),
-    };
+    if (reduceMotion) {
+      shuffle.value = 1;
+      return;
+    }
     shuffle.value = withSequence(
-      withTiming(0.2, step),
-      withTiming(0.4, step),
-      withTiming(0.6, step),
-      withTiming(0.8, step),
-      withTiming(1, step, (finished) => {
+      withTiming(0.22, { duration: 950, easing: Easing.inOut(Easing.cubic) }),
+      withTiming(0.36, { duration: 650, easing: Easing.inOut(Easing.cubic) }),
+      withTiming(0.48, { duration: 600, easing: Easing.linear }),
+      withTiming(0.58, { duration: 400, easing: Easing.inOut(Easing.sin) }),
+      withTiming(0.75, { duration: 850, easing: Easing.inOut(Easing.cubic) }),
+      withTiming(1, { duration: 850, easing: Easing.linear }, (finished) => {
         if (finished) scheduleOnRN(setIsShuffling, false);
       }),
     );
     return () => cancelAnimation(shuffle);
-  }, [shuffle]);
+  }, [shuffle, reduceMotion]);
 
   useEffect(() => {
     if (!reduceMotion)
@@ -121,10 +125,10 @@ export function SurpriseCardDemo({
     ],
   }));
   const hint = isShuffling
-    ? "A little shuffle. A little suspense."
+    ? "Split. Riffle. A little magic."
     : selectedCard === null
       ? "Which one is calling your name?"
-      : "Great pick. Press Reveal for the surprise.";
+      : "Tap your card again, or press Reveal.";
   const message = addedToCart
     ? "In your cart. Nice pick!"
     : selectedCard === 0
@@ -200,6 +204,11 @@ export function SurpriseCardDemo({
           </View>
         ) : (
           <>
+            <DeckStack
+              width={cardWidth * 1.35}
+              shuffle={shuffle}
+              progress={progress}
+            />
             {products.map((product, index) => (
               <PlayingCard
                 key={index}
@@ -214,8 +223,10 @@ export function SurpriseCardDemo({
                 progress={progress}
                 float={float}
                 shuffle={shuffle}
-                disabled={isShuffling}
-                onPress={() => onSelectCard(index)}
+                disabled={isShuffling || (hasPlayed && selectedCard !== index)}
+                onPress={() =>
+                  selectedCard === index ? onReveal() : onSelectCard(index)
+                }
               />
             ))}
             {Array.from(
@@ -262,8 +273,8 @@ export function SurpriseCardDemo({
             {isShuffling
               ? "Your surprise is getting ready"
               : selectedCard === null
-                ? "Tap one of the three cards"
-                : "Your reveal is one tap away"}
+                ? "Choose one of the three cards"
+                : "Your choice. Your little lucky moment."}
           </Text>
         </Animated.View>
         <Animated.View style={[styles.copy, revealedStyle]}>
